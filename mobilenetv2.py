@@ -75,6 +75,19 @@ class InvertedResidual(nn.Module):
 
 
 class MobileNetV2(nn.Module):
+    """
+    MobileNet V2 main class
+
+    Args:
+        num_classes (int): Number of classes
+        width_mult (float): Width multiplier - adjusts number of channels in each layer by this amount
+        inverted_residual_setting: Network structure
+        round_nearest (int): Round the number of channels in each layer to be a multiple of this number
+        Set to 1 to turn off rounding
+        block: Module specifying inverted residual building block for mobilenet
+        norm_layer: Module specifying the normalization layer to use
+
+    """
     def __init__(self,
                  num_classes=1000,
                  width_mult=1.0,
@@ -82,19 +95,6 @@ class MobileNetV2(nn.Module):
                  round_nearest=8,
                  block=None,
                  norm_layer=None):
-        """
-        MobileNet V2 main class
-
-        Args:
-            num_classes (int): Number of classes
-            width_mult (float): Width multiplier - adjusts number of channels in each layer by this amount
-            inverted_residual_setting: Network structure
-            round_nearest (int): Round the number of channels in each layer to be a multiple of this number
-            Set to 1 to turn off rounding
-            block: Module specifying inverted residual building block for mobilenet
-            norm_layer: Module specifying the normalization layer to use
-
-        """
         super(MobileNetV2, self).__init__()
 
         if block is None:
@@ -191,10 +191,6 @@ def mobilenet_v2(pretrained=True, **kwargs):
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     model = MobileNetV2(**kwargs)
-    # if pretrained:
-    #     print('v2 pretrained loading....')
-    #     state_dict = model_zoo.load_url(model_urls['mobilenet_v2'])
-    #     model.load_state_dict(state_dict)
     if pretrained:
         pretrained_vgg = model_zoo.load_url(model_urls['mobilenet_v2'])
         model_dict = {}
@@ -202,7 +198,6 @@ def mobilenet_v2(pretrained=True, **kwargs):
         for k, v in pretrained_vgg.items():
             if k in state_dict:
                 model_dict[k] = v
-                # print(k, v)
 
     state_dict.update(model_dict)
     model.load_state_dict(state_dict)

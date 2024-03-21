@@ -2,15 +2,16 @@ import os
 import torch
 import torch.nn.functional as F
 
-import numpy as np
 from datetime import datetime
 from torchvision.utils import make_grid
-from utils import clip_gradient, adjust_lr
+from utils import adjust_lr
+
 from tensorboardX import SummaryWriter
 import logging
 import torch.backends.cudnn as cudnn
 from config import opt
 from torch.cuda import amp
+
 # set the device for training
 cudnn.benchmark = True
 cudnn.enabled = True
@@ -20,7 +21,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = opt.gpu_id
 print('USE GPU:', opt.gpu_id)
 
 # build the model
-from zy_LSNet.LSNet import LSNet
+from LSNet import LSNet
 model = LSNet()
 if (opt.load is not None):
     model.load_state_dict(torch.load(opt.load))

@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torch.functional as F
+from mobilenetv3 import mobilenet_v3_small
 
 class AFD_semantic(nn.Module):
     '''
@@ -76,13 +76,12 @@ class AFD_spatial(nn.Module):
         loss =torch.sum(loss,dim=(2,3)).mean(0)
         return loss
 
-from zy_LSNet.mobilenetv2 import mobilenet_v2
 class LSNet(nn.Module):
     def __init__(self):
         super(LSNet, self).__init__()
         # rgb,depth encode
-        self.rgb_pretrained = mobilenet_v2()
-        self.depth_pretrained = mobilenet_v2()
+        self.rgb_pretrained = mobilenet_v3_small()
+        self.depth_pretrained = mobilenet_v3_small()
 
         # Upsample_model
         self.upsample1_g = nn.Sequential(nn.Conv2d(68, 34, 3, 1, 1, ), nn.BatchNorm2d(34), nn.GELU(),
