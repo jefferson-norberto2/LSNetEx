@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
-from torchvision.models.mobilenetv3 import mobilenet_v3_small
+#from torchvision.models.mobilenetv3 import mobilenet_v3_small
+from mobilenet import mobilenet_v3_small_ex
 # from mobilenetv3 import mobilenet_v3_small
 
 class AFD_semantic(nn.Module):
@@ -81,8 +82,8 @@ class LSNet(nn.Module):
     def __init__(self):
         super(LSNet, self).__init__()
         # rgb,depth encode
-        self.rgb_pretrained = mobilenet_v3_small()
-        self.depth_pretrained = mobilenet_v3_small()
+        self.rgb_pretrained = mobilenet_v3_small_ex()
+        self.depth_pretrained = mobilenet_v3_small_ex()
 
         # Upsample_model
         self.upsample1_g = nn.Sequential(nn.Conv2d(68, 34, 3, 1, 1, ), nn.BatchNorm2d(34), nn.GELU(),
