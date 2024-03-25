@@ -94,11 +94,8 @@ class LSNet(nn.Module):
 
         self.upsample3_g = nn.Sequential(nn.Conv2d(168, 80, 3, 1, 1, ), nn.BatchNorm2d(80), nn.GELU(),
                                          nn.UpsamplingBilinear2d(scale_factor=2, ))
-        
-        #self.upsample3_g = nn.Sequential(nn.Conv2d(168, 80, 3, 1, 1, ), nn.BatchNorm2d(80), nn.GELU(),
-        #                                nn.UpsamplingBilinear2d(scale_factor=2, ))
-        
-        self.upsample4_g = nn.Sequential(nn.Conv2d(256, 128, 3, 1, 1, ), nn.BatchNorm2d(128), nn.GELU(),
+
+        self.upsample4_g = nn.Sequential(nn.Conv2d(264, 128, 3, 1, 1, ), nn.BatchNorm2d(128), nn.GELU(),
                                          nn.UpsamplingBilinear2d(scale_factor=2, ))
 
         #self.upsample5_g = nn.Sequential(nn.Conv2d(320, 160, 3, 1, 1, ), nn.BatchNorm2d(160), nn.GELU(),
@@ -117,10 +114,10 @@ class LSNet(nn.Module):
         # Tips: speed test and params and more this part is not included.
         # please comment this part when involved.
         if self.training:
-            self.AFD_semantic_5_R_T = AFD_semantic(320,0.0625)
+            self.AFD_semantic_5_R_T = AFD_semantic(576,0.0625)
             self.AFD_semantic_4_R_T = AFD_semantic(96,0.0625)
-            self.AFD_semantic_3_R_T = AFD_semantic(32,0.0625)
-            self.AFD_spatial_3_R_T = AFD_spatial(32)
+            self.AFD_semantic_3_R_T = AFD_semantic(40,0.0625)
+            self.AFD_spatial_3_R_T = AFD_spatial(40)
             self.AFD_spatial_2_R_T = AFD_spatial(24)
             self.AFD_spatial_1_R_T = AFD_spatial(16)
 
