@@ -98,8 +98,12 @@ class LSNet(nn.Module):
         self.upsample4_g = nn.Sequential(nn.Conv2d(256, 128, 3, 1, 1, ), nn.BatchNorm2d(128), nn.GELU(),
                                          nn.UpsamplingBilinear2d(scale_factor=2, ))
 
-        self.upsample5_g = nn.Sequential(nn.Conv2d(320, 160, 3, 1, 1, ), nn.BatchNorm2d(160), nn.GELU(),
+        #self.upsample5_g = nn.Sequential(nn.Conv2d(320, 160, 3, 1, 1, ), nn.BatchNorm2d(160), nn.GELU(),
+        #                                 nn.UpsamplingBilinear2d(scale_factor=2, ))
+        
+        self.upsample5_g = nn.Sequential(nn.Conv2d(576, 160, 3, 1, 1, ), nn.BatchNorm2d(160), nn.GELU(),
                                          nn.UpsamplingBilinear2d(scale_factor=2, ))
+
 
 
         self.conv_g = nn.Conv2d(34, 1, 1)
