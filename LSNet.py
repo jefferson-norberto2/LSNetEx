@@ -92,16 +92,19 @@ class LSNet(nn.Module):
         self.upsample2_g = nn.Sequential(nn.Conv2d(104, 52, 3, 1, 1, ), nn.BatchNorm2d(52), nn.GELU(),
                                          nn.UpsamplingBilinear2d(scale_factor=2, ))
 
-        self.upsample3_g = nn.Sequential(nn.Conv2d(160, 80, 3, 1, 1, ), nn.BatchNorm2d(80), nn.GELU(),
+        self.upsample3_g = nn.Sequential(nn.Conv2d(168, 80, 3, 1, 1, ), nn.BatchNorm2d(80), nn.GELU(),
                                          nn.UpsamplingBilinear2d(scale_factor=2, ))
-
+        
+        #self.upsample3_g = nn.Sequential(nn.Conv2d(168, 80, 3, 1, 1, ), nn.BatchNorm2d(80), nn.GELU(),
+        #                                nn.UpsamplingBilinear2d(scale_factor=2, ))
+        
         self.upsample4_g = nn.Sequential(nn.Conv2d(256, 128, 3, 1, 1, ), nn.BatchNorm2d(128), nn.GELU(),
                                          nn.UpsamplingBilinear2d(scale_factor=2, ))
 
         #self.upsample5_g = nn.Sequential(nn.Conv2d(320, 160, 3, 1, 1, ), nn.BatchNorm2d(160), nn.GELU(),
         #                                 nn.UpsamplingBilinear2d(scale_factor=2, ))
         
-        self.upsample5_g = nn.Sequential(nn.Conv2d(576, 160, 3, 1, 1, ), nn.BatchNorm2d(160), nn.GELU(),
+        self.upsample5_g = nn.Sequential(nn.Conv2d(576, 168, 3, 1, 1, ), nn.BatchNorm2d(168), nn.GELU(),
                                          nn.UpsamplingBilinear2d(scale_factor=2, ))
 
 
