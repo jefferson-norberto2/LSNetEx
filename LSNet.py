@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
-from mobilenetv3 import mobilenet_v3_small
+from torchvision.models.mobilenetv3 import mobilenet_v3_small
+# from mobilenetv3 import mobilenet_v3_small
 
 class AFD_semantic(nn.Module):
     '''
