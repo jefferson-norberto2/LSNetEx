@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchvision.models.mobilenetv3 import SqueezeExcitation, ConvBNActivation # InvertedResidual, InvertedResidualConfig
-
+from torchvision.ops.misc import SqueezeExcitation # InvertedResidual, InvertedResidualConfig
+from typing import Callable, Optional
 __all__ = ['MobileNetV3', 'mobilenet_v3']
 
 
@@ -10,6 +10,33 @@ model_urls = {
     'mobilenet_v3': 'https://download.pytorch.org/models/mobilenet_v3_small-047dcff4.pth',
 }
 
+class ConvBNActivation(nn.Sequential):
+    def __init__(
+        self,
+        in_planes: int,
+        out_planes: int,
+        kernel_size: int = 3,
+        stride: int = 1,
+        groups: int = 1,
+        norm_layer: Optional[Callable[..., nn.Module]] = None,
+        activation_layer: Optional[Callable[..., nn.Module]] = None,
+        dilation: int = 1,
+    ) -> None:
+        padding = (kernel_size - 1) // 2 * dilation
+        if norm_layer is None:
+            norm_layer = nn.BatchNorm2d
+        if activation_layer is None:
+            activation_layer = nn.ReLU6
+        super(ConvBNReLU, self).__init__(
+            nn.Conv2d(in_planes, out_planes, kernel_size, stride, padding, dilation=dilation, groups=groups,
+                      bias=False),
+            norm_layer(out_planes),
+            activation_layer(inplace=True)
+        )
+        self.out_channels = out_planes
+
+# necessary for backwards compatibility
+ConvBNReLU = ConvBNActivation
 
 class InvertedResidualConfig:
     def __init__(self, input_channels, kernel, expanded_channels, out_channels, use_se, activation, stride):
