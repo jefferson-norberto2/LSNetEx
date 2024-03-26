@@ -1,41 +1,44 @@
-import os
 from PIL import Image
-import torch.utils.data as data
-import torchvision.transforms as transforms
 import random
 import numpy as np
 from PIL import ImageEnhance
 
 # several data augumentation strategies
-def cv_random_flip(img, label, depth):
+def cv_random_flip(img, label, ti):
     flip_flag = random.randint(0, 1)
+    
     if flip_flag == 1:
         img = img.transpose(Image.FLIP_LEFT_RIGHT)
         label = label.transpose(Image.FLIP_LEFT_RIGHT)
-        depth = depth.transpose(Image.FLIP_LEFT_RIGHT)
-    return img, label, depth
+        ti = ti.transpose(Image.FLIP_LEFT_RIGHT)
+    
+    return img, label, ti
 
 
-def randomCrop(image, label, depth):
+def randomCrop(image, label, ti):
     border = 30
     image_width = image.size[0]
     image_height = image.size[1]
     crop_win_width = np.random.randint(image_width - border, image_width)
     crop_win_height = np.random.randint(image_height - border, image_height)
+    
     random_region = (
         (image_width - crop_win_width) >> 1, (image_height - crop_win_height) >> 1, (image_width + crop_win_width) >> 1,
         (image_height + crop_win_height) >> 1)
-    return image.crop(random_region), label.crop(random_region), depth.crop(random_region)
+    
+    return image.crop(random_region), label.crop(random_region), ti.crop(random_region)
 
 
-def randomRotation(image, label, depth):
+def randomRotation(image, label, ti):
     mode = Image.BICUBIC
+    
     if random.random() > 0.8:
         random_angle = np.random.randint(-15, 15)
         image = image.rotate(random_angle, mode)
         label = label.rotate(random_angle, mode)
-        depth = depth.rotate(random_angle, mode)
-    return image, label, depth
+        ti = ti.rotate(random_angle, mode)
+    
+    return image, label, ti
 
 
 def colorEnhance(image):
@@ -47,15 +50,16 @@ def colorEnhance(image):
     image = ImageEnhance.Color(image).enhance(color_intensity)
     sharp_intensity = random.randint(0, 30) / 10.0
     image = ImageEnhance.Sharpness(image).enhance(sharp_intensity)
+    
     return image
 
+def gaussianNoisy(im, mean, sigma):
+    for _i in range(len(im)):
+        im[_i] += random.gauss(mean, sigma)
+    
+    return im
 
 def randomGaussian(image, mean=0.1, sigma=0.35):
-    def gaussianNoisy(im, mean=mean, sigma=sigma):
-        for _i in range(len(im)):
-            im[_i] += random.gauss(mean, sigma)
-        return im
-
     img = np.asarray(image)
     width, height = img.shape
     img = gaussianNoisy(img[:].flatten(), mean, sigma)
@@ -66,109 +70,14 @@ def randomGaussian(image, mean=0.1, sigma=0.35):
 def randomPeper(img):
     img = np.array(img)
     noiseNum = int(0.0015 * img.shape[0] * img.shape[1])
-    for i in range(noiseNum):
-
+    
+    for _ in range(noiseNum):
         randX = random.randint(0, img.shape[0] - 1)
-
         randY = random.randint(0, img.shape[1] - 1)
 
         if random.randint(0, 1) == 0:
-
             img[randX, randY] = 0
-
         else:
-
             img[randX, randY] = 255
+    
     return Image.fromarray(img)
-
-
-# dataset for training
-# The current loader is not using the normalized depth maps for training and test. If you use the normalized depth maps
-# (e.g., 0 represents background and 1 represents foreground.), the performance will be further improved.
-class SalObjDataset(data.Dataset):
-    def __init__(self, image_root, gt_root, depth_root, trainsize):
-        self.trainsize = trainsize
-        self.images = [image_root + f for f in os.listdir(image_root) if f.endswith('.jpg')
-                        or f.endswith('.png')]
-        # print(self.images)
-        self.gts = [gt_root + f for f in os.listdir(gt_root) if f.endswith('.jpg')
-                    or f.endswith('.png')]
-        self.depths = [depth_root + f for f in os.listdir(depth_root) if f.endswith('.bmp')
-                       or f.endswith('.png')]
-        self.images = sorted(self.images)
-        self.gts = sorted(self.gts)
-        self.depths = sorted(self.depths)
-        self.filter_files()
-        self.size = len(self.images)
-        self.img_transform = transforms.Compose([
-            transforms.Resize((self.trainsize, self.trainsize)),
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
-        self.gt_transform = transforms.Compose([
-            transforms.Resize((self.trainsize, self.trainsize)),
-            transforms.ToTensor()])
-        self.depths_transform = transforms.Compose([
-            transforms.Resize((self.trainsize, self.trainsize)),
-             transforms.ToTensor(),
-             transforms.Normalize([0.485], [0.229])
-             ])
-
-    def __getitem__(self, index):
-        image = self.rgb_loader(self.images[index])
-        gt = self.binary_loader(self.gts[index])
-        depth = self.binary_loader(self.depths[index])
-        image, gt, depth = cv_random_flip(image, gt, depth)
-        image, gt, depth = randomCrop(image, gt, depth)
-        image, gt, depth = randomRotation(image, gt, depth)
-        image = colorEnhance(image)
-        # gt=randomGaussian(gt)
-        gt = randomPeper(gt)
-        # image, gt, depth = self.resize(image,gt, depth)
-        image = self.img_transform(image)
-        gt = self.gt_transform(gt)
-        depth = self.depths_transform(depth)
-        # depth = torch.div(depth.float(),255.0)  # DUT
-
-        return image, gt, depth
-
-    def filter_files(self):
-        assert len(self.images) == len(self.gts) and len(self.gts) == len(self.images)
-        # print(len(self.images),len(self.gts),len(self.depths))
-        images = []
-        gts = []
-        depths = []
-        for img_path, gt_path, depth_path in zip(self.images, self.gts, self.depths):
-            img = Image.open(img_path)
-            gt = Image.open(gt_path)
-            depth = Image.open(depth_path)
-            if img.size == gt.size and gt.size == depth.size:
-            # if img.size == gt.size:
-                images.append(img_path)
-                gts.append(gt_path)
-                depths.append(depth_path)
-        self.images = images
-        self.gts = gts
-        self.depths = depths
-
-    def rgb_loader(self, path):
-        # print(path)
-        with open(path, 'rb') as f:
-            img = Image.open(f)
-            # print(img)
-            return img.convert('RGB')
-
-    def binary_loader(self, path):
-        with open(path, 'rb') as f:
-            img = Image.open(f)
-            return img.convert('L')
-
-    def resize(self, img, gt, depth):
-        assert img.size == gt.size and gt.size == depth.size
-        h = self.trainsize
-        w = self.trainsize
-        return img.resize((w, h), Image.BILINEAR), gt.resize((w, h), Image.NEAREST), depth.resize((w, h),
-                                                                                                  Image.NEAREST)
-
-    def __len__(self):
-        return self.size
-

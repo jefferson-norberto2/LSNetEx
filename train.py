@@ -18,7 +18,7 @@ from torch.backends import cudnn
 from config import opt
 from torch.cuda import amp
 
-from LSNet import LSNet
+from models.LSNet import LSNet
 
 # set the device for training
 cudnn.benchmark = True
@@ -49,7 +49,7 @@ if not exists(save_path):
 # load data
 print('load data...')
 if opt.task =='RGBT':
-    from rgbt_dataset import get_loader, test_dataset
+    from dataloader.rgbt_dataset import get_loader, test_dataset
     image_root = train_dataset_path  + '/RGB/'
     ti_root = train_dataset_path  + '/T/'
     gt_root = train_dataset_path  + '/GT/'
@@ -57,7 +57,7 @@ if opt.task =='RGBT':
     val_ti_root = val_dataset_path + '/T/'
     val_gt_root = val_dataset_path + '/GT/'
 elif opt.task == 'RGBD':
-    from rgbd_dataset import get_loader, test_dataset
+    from dataloader.rgbd_dataset import get_loader, test_dataset
     image_root = train_dataset_path + '/RGB/'
     ti_root = train_dataset_path + '/depth/'
     gt_root = train_dataset_path + '/GT/'
