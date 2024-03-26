@@ -6,21 +6,13 @@ import random
 import numpy as np
 from PIL import ImageEnhance
 
-
 # several data augumentation strategies
 def cv_random_flip(img, label, ti):
     flip_flag = random.randint(0, 1)
-    # flip_flag2= random.randint(0,1)
-    # left right flip
     if flip_flag == 1:
         img = img.transpose(Image.FLIP_LEFT_RIGHT)
         label = label.transpose(Image.FLIP_LEFT_RIGHT)
         ti = ti.transpose(Image.FLIP_LEFT_RIGHT)
-    # top bottom flip
-    # if flip_flag2==1:
-    #     img = img.transpose(Image.FLIP_TOP_BOTTOM)
-    #     label = label.transpose(Image.FLIP_TOP_BOTTOM)
-    #     ti = ti.transpose(Image.FLIP_TOP_BOTTOM)
     return img, label, ti
 
 
