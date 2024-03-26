@@ -1,7 +1,7 @@
 import argparse
 parser = argparse.ArgumentParser()
 
-task = 'RGBD'
+task = 'RGBT'
 
 # train/val
 parser.add_argument('--task', type=str, default=task, help='epoch number')

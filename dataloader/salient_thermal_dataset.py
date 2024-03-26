@@ -11,14 +11,12 @@ from dataloader.data_agumentation import *
 class SalientThermalDataset(data.Dataset):
     def __init__(self, image_root, gt_root, ti_root,  trainsize):
         self.trainsize = trainsize
-        self.images = [image_root + f for f in os.listdir(image_root) if f.endswith('.jpg')]
-        # print(self.images)
+        self.images = [image_root + f for f in os.listdir(image_root) if f.endswith('.jpg') or f.endswith('.png')]
         self.gts = [gt_root + f for f in os.listdir(gt_root) if f.endswith('.jpg')
                     or f.endswith('.png')]
-
         self.tis = [ti_root + f for f in os.listdir(ti_root) if f.endswith('.jpg')
-                       or f.endswith('.png')]
-
+                       or f.endswith('.png') or f.endswith('bmp')]
+        
         self.images = sorted(self.images)
         self.gts = sorted(self.gts)
         self.tis = sorted(self.tis)

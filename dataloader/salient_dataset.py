@@ -8,7 +8,7 @@ from dataloader.data_agumentation import *
 # dataset for training
 # The current loader is not using the normalized depth maps for training and test. If you use the normalized depth maps
 # (e.g., 0 represents background and 1 represents foreground.), the performance will be further improved.
-class SalientDepthDataset(data.Dataset):
+class SalientDataset(data.Dataset):
     def __init__(self, image_root, gt_root, depth_root, trainsize):
         self.trainsize = trainsize
         self.images = [image_root + f for f in os.listdir(image_root) if f.endswith('.jpg') or f.endswith('.png')]
@@ -30,10 +30,7 @@ class SalientDepthDataset(data.Dataset):
         self.gt_transform = transforms.Compose([
             transforms.Resize((self.trainsize, self.trainsize)),
             transforms.ToTensor()])
-        self.depths_transform = transforms.Compose([
-            transforms.Resize((self.trainsize, self.trainsize)),
-             transforms.ToTensor(),
-             transforms.Normalize([0.485], [0.229])])
+        self.salient_transform = None
 
     def __getitem__(self, index):
         image = self.rgb_loader(self.images[index])
@@ -46,7 +43,7 @@ class SalientDepthDataset(data.Dataset):
         gt = randomPeper(gt)
         image = self.img_transform(image)
         gt = self.gt_transform(gt)
-        depth = self.depths_transform(depth)
+        depth = self.salient_transform(depth)
         return image, gt, depth
 
     def filter_files(self):
@@ -76,6 +73,18 @@ class SalientDepthDataset(data.Dataset):
             img = Image.open(f)
             return img.convert('L')
 
+    def __len__(self):
+        return self.size
+    
+class SalientDepthDataset(SalientDataset):
+    def __init__(self, image_root, gt_root, depth_root, trainsize):
+        super(SalientDepthDataset, self).__init__(image_root, gt_root, depth_root, trainsize)
+        
+        self.salient_transform = transforms.Compose([
+            transforms.Resize((self.trainsize, self.trainsize)),
+             transforms.ToTensor(),
+             transforms.Normalize([0.485], [0.229])])
+
     def resize(self, img, gt, depth):
         assert img.size == gt.size and gt.size == depth.size
         h = self.trainsize
@@ -83,6 +92,21 @@ class SalientDepthDataset(data.Dataset):
         return img.resize((w, h), Image.BILINEAR), gt.resize((w, h), Image.NEAREST), depth.resize((w, h),
                                                                                                   Image.NEAREST)
 
+class SalientThermalDataset(SalientDataset):
+    def __init__(self, image_root, gt_root, ti_root,  trainsize):
+        super(SalientThermalDataset, self).__init__(image_root, gt_root, ti_root, trainsize)
+        self.salient_transform = transforms.Compose([
+            transforms.Resize((self.trainsize, self.trainsize)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
 
-    def __len__(self):
-        return self.size
+    def resize(self, img, gt, ti):
+        assert img.size == gt.size and gt.size == ti.size
+        w, h = img.size
+        if h < self.trainsize or w < self.trainsize:
+            h = max(h, self.trainsize)
+            w = max(w, self.trainsize)
+            return img.resize((w, h), Image.BILINEAR), gt.resize((w, h), Image.NEAREST), ti.resize((w, h),
+                                                                                                      Image.NEAREST)
+        else:
+            return img, gt, ti
