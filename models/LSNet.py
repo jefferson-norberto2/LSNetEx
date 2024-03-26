@@ -95,9 +95,6 @@ class LSNet(nn.Module):
 
         self.upsample4_g = nn.Sequential(nn.Conv2d(264, 128, 3, 1, 1, ), nn.BatchNorm2d(128), nn.GELU(),
                                          nn.UpsamplingBilinear2d(scale_factor=2, ))
-
-        #self.upsample5_g = nn.Sequential(nn.Conv2d(320, 160, 3, 1, 1, ), nn.BatchNorm2d(160), nn.GELU(),
-        #                                 nn.UpsamplingBilinear2d(scale_factor=2, ))
         
         self.upsample5_g = nn.Sequential(nn.Conv2d(576, 168, 3, 1, 1, ), nn.BatchNorm2d(168), nn.GELU(),
                                          nn.UpsamplingBilinear2d(scale_factor=2, ))
@@ -169,9 +166,4 @@ class LSNet(nn.Module):
                       loss_spatial_1_R_T + loss_spatial_1_T_R
             return out, out2, out3, loss_KD
         return out
-
-
-
-
-
 

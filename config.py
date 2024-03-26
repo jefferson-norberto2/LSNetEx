@@ -1,7 +1,10 @@
 import argparse
 parser = argparse.ArgumentParser()
+
+task = 'RGBD'
+
 # train/val
-parser.add_argument('--task', type=str, default='RGBT', help='epoch number')
+parser.add_argument('--task', type=str, default=task, help='epoch number')
 parser.add_argument('--epoch', type=int, default=20, help='epoch number')
 parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
 parser.add_argument('--batchsize', type=int, default=10, help='training batch size')
@@ -11,8 +14,8 @@ parser.add_argument('--decay_rate', type=float, default=0.1, help='decay rate of
 parser.add_argument('--decay_epoch', type=int, default=40, help='every n epochs decay learning rate')
 parser.add_argument('--load', type=str, default=None, help='train from checkpoints')
 parser.add_argument('--gpu_id', type=str, default='0', help='select gpu id')
-parser.add_argument('--train_root', type=str, default='RGBT_dataset/train', help='the train images root')
-parser.add_argument('--val_root', type=str, default='RGBT_dataset/val', help='the val images root')
+parser.add_argument('--train_root', type=str, default=f'{task}_dataset/train', help='the train images root')
+parser.add_argument('--val_root', type=str, default=f'{task}_dataset/val', help='the val images root')
 parser.add_argument('--save_path', type=str, default='Runs/train1', help='the path to save models and logs')
 # test(predict)
 parser.add_argument('--testsize', type=int, default=224, help='testing size')
