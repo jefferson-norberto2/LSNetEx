@@ -1,3 +1,7 @@
 Datasets/*
 Runs/*
 __pycache__/*
+RGBT_dataset/*
+RGBD_dataset/*
+
+*.pyc

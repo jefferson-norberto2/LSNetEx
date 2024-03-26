@@ -1,7 +1,7 @@
 from os import makedirs, environ
 from os.path import exists
 
-from torch import load, cat, sigmoid, tensor, save, no_grad, sum, abs, numel, as_tensor
+from torch import load, cat, sigmoid, tensor, save, no_grad, sum, abs, numel, as_tensor, cuda, device
 from torch.optim import Adam
 from torch.nn.functional import interpolate
 from torch.nn import BCEWithLogitsLoss
@@ -19,63 +19,65 @@ from config import opt
 from torch.cuda import amp
 
 from models.LSNet import LSNet
+from dataloader.dataset import get_loader, test_dataset
 
 # set the device for training
 cudnn.benchmark = True
 cudnn.enabled = True
 
 environ["CUDA_VISIBLE_DEVICES"] = opt.gpu_id
-print('USE GPU:', opt.gpu_id)
 
 # build the model
 model = LSNet()
-
-if (opt.load is not None):
-    model.load_state_dict(load(opt.load))
-    print('load model from ', opt.load)
-
-model.cuda()
 params = model.parameters()
 optimizer = Adam(params, opt.lr)
 
-# set the path
+# Load model state_dict if specified
+if opt.load is not None:
+    model.load_state_dict(load(opt.load))
+    print('Loaded model from', opt.load)
+
+# Set device for model
+run_device = device('cuda' if cuda.is_available() else 'cpu')
+model.to(run_device)
+print('Runing on', run_device)
+
+# Set the path
 train_dataset_path = opt.train_root
 val_dataset_path = opt.val_root
 save_path = opt.save_path
 
+# Check if save path exists, create if not
 if not exists(save_path):
     makedirs(save_path)
 
-# load data
-print('load data...')
-if opt.task =='RGBT':
-    from dataloader.rgbt_dataset import get_loader, test_dataset
-    image_root = train_dataset_path  + '/RGB/'
-    ti_root = train_dataset_path  + '/T/'
-    gt_root = train_dataset_path  + '/GT/'
-    val_image_root = val_dataset_path + '/RGB/'
+# Load data paths
+image_root = train_dataset_path + '/RGB/'
+gt_root = train_dataset_path + '/GT/'
+val_image_root = val_dataset_path + '/RGB/'
+val_gt_root = val_dataset_path + '/GT/'
+
+# Determine task-specific data paths
+if opt.task == 'RGBT':
+    ti_root = train_dataset_path + '/T/'
     val_ti_root = val_dataset_path + '/T/'
-    val_gt_root = val_dataset_path + '/GT/'
 elif opt.task == 'RGBD':
-    from dataloader.rgbd_dataset import get_loader, test_dataset
-    image_root = train_dataset_path + '/RGB/'
     ti_root = train_dataset_path + '/depth/'
-    gt_root = train_dataset_path + '/GT/'
-    val_image_root = val_dataset_path + '/RGB/'
     val_ti_root = val_dataset_path + '/depth/'
-    val_gt_root = val_dataset_path + '/GT/'
 else:
     raise ValueError(f"Unknown task type {opt.task}")
 
+# Load data loaders
 train_loader = get_loader(image_root, gt_root, ti_root, batchsize=opt.batchsize, trainsize=opt.trainsize)
-test_loader = test_dataset(val_image_root, val_gt_root,val_ti_root, opt.trainsize)
+test_loader = test_dataset(val_image_root, val_gt_root, val_ti_root, opt.trainsize)
 total_step = len(train_loader)
 
-basicConfig(filename=save_path + 'log.log', format='[%(asctime)s-%(filename)s-%(levelname)s:%(message)s]',
-                    level=INFO, filemode='a', datefmt='%Y-%m-%d %I:%M:%S %p')
+# Set up logging
+log_file_path = save_path + 'log.log'
+basicConfig(filename=log_file_path, format='[%(asctime)s-%(filename)s-%(levelname)s:%(message)s]',
+             level=INFO, filemode='a', datefmt='%Y-%m-%d %I:%M:%S %p')
 info("Model:")
 info(model)
-
 info(save_path + "Train")
 info("Config")
 info(
@@ -83,19 +85,21 @@ info(
         opt.epoch, opt.lr, opt.batchsize, opt.trainsize, opt.clip, opt.decay_rate, opt.load, save_path,
         opt.decay_epoch))
 
-CE = BCEWithLogitsLoss().cuda()
-IOUBCE = IOUBCE_loss().cuda()
+# Set up loss functions
+CE = BCEWithLogitsLoss().to(run_device)
+IOUBCE = IOUBCE_loss().to(run_device)
+IOUBCEWithoutLogits = IOUBCEWithoutLogits_loss().to(run_device)
 
-IOUBCEWithoutLogits = IOUBCEWithoutLogits_loss().cuda()
-
+# Initialize other variables
 step = 0
-writer = SummaryWriter(save_path + 'summary', flush_secs = 30)
+writer = SummaryWriter(save_path + 'summary', flush_secs=30)
 best_mae = 1
 best_epoch = 0
 Sacler = amp.GradScaler()
 
+
 # train function
-def train(train_loader, model, optimizer, epoch, save_path):
+def train(train_loader, model, optimizer, epoch, save_path, device):
     global step
     model.train()
     loss_all = 0
@@ -103,16 +107,16 @@ def train(train_loader, model, optimizer, epoch, save_path):
     try:
         for i, (images, gts, tis) in enumerate(train_loader, start=1):
             optimizer.zero_grad()
-            images = images.cuda()
-            tis = tis.cuda()
-            gts = gts.cuda()
+            images = images.to(device)
+            tis = tis.to(device)
+            gts = gts.to(device)
             if opt.task == 'RGBD':
                 tis = cat((tis, tis, tis), dim=1)
 
             gts2 = interpolate(gts, (112, 112))
             gts3 = interpolate(gts, (56, 56))
 
-            bound = tesnor_bound(gts, 3).cuda()
+            bound = tesnor_bound(gts, 3).to(device)
             bound2 = interpolate(bound, (112, 112))
             bound3 = interpolate(bound, (56, 56))
 
@@ -178,17 +182,18 @@ def train(train_loader, model, optimizer, epoch, save_path):
         print('save checkpoints successfully!')
         raise
 
+
 # test function
-def test(test_loader, model, epoch, save_path):
+def test(test_loader, model, epoch, save_path, device):
     global best_mae, best_epoch
     model.eval()
     with no_grad():
         mae_sum = 0
         for _ in range(test_loader.size):
             image, gt, ti, _ = test_loader.load_data()
-            gt = gt.cuda()
-            image = image.cuda()
-            ti = ti.cuda()
+            gt = gt.to(device)
+            image = image.to(device)
+            ti = ti.to(device)
             if opt.task == 'RGBD':
                 tis = cat((tis, tis, tis), dim=1)
 
@@ -218,5 +223,5 @@ if __name__ == '__main__':
     for epoch in range(1, opt.epoch+1):
         cur_lr = adjust_lr(optimizer, opt.lr, epoch, opt.decay_rate, opt.decay_epoch)
         writer.add_scalar('learning_rate', cur_lr, global_step=epoch)
-        train(train_loader, model, optimizer, epoch, save_path)
-        test(test_loader, model, epoch, save_path)
+        train(train_loader, model, optimizer, epoch, save_path, run_device)
+        test(test_loader, model, epoch, save_path, run_device)

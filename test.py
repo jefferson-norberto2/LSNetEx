@@ -28,10 +28,10 @@ model.eval()
 #test
 test_mae = []
 if opt.task =='RGBT':
-    from dataloader.rgbt_dataset import test_dataset
+    from dataloader.dataset import test_dataset
     test_datasets = ['VT800','VT1000','VT5000']
 elif opt.task == 'RGBD':
-    from dataloader.rgbd_dataset import test_dataset
+    from dataloader.dataset import test_dataset
     test_datasets = ['NJU2K', 'DES', 'LFSD', 'NLPR', 'SIP']
 else:
     raise ValueError(f"Unknown task type {opt.task}")
