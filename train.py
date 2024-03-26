@@ -68,7 +68,7 @@ else:
     raise ValueError(f"Unknown task type {opt.task}")
 
 # Load data loaders
-train_loader = get_loader(image_root, gt_root, ti_root, batchsize=opt.batchsize, trainsize=opt.trainsize)
+train_loader = get_loader(image_root, gt_root, ti_root, batchsize=opt.batchsize, trainsize=opt.trainsize, task=opt.task)
 test_loader = test_dataset(val_image_root, val_gt_root, val_ti_root, opt.trainsize)
 total_step = len(train_loader)
 

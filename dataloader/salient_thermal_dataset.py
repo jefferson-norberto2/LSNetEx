@@ -8,7 +8,7 @@ from dataloader.data_agumentation import *
 # dataset for training
 # The current loader is not using the normalized ti maps for training and test. If you use the normalized ti maps
 # (e.g., 0 represents background and 1 represents foreground.), the performance will be further improved.
-class SalObjDataset(data.Dataset):
+class SalientThermalDataset(data.Dataset):
     def __init__(self, image_root, gt_root, ti_root,  trainsize):
         self.trainsize = trainsize
         self.images = [image_root + f for f in os.listdir(image_root) if f.endswith('.jpg')]

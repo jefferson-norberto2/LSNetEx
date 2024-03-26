@@ -3,11 +3,16 @@ from PIL import Image
 import torch.utils.data as data
 import torchvision.transforms as transforms
 
-from dataloader.sal_obj_dataset import SalObjDataset
+from dataloader.salient_depth_dataset import SalientDepthDataset
+from dataloader.salient_thermal_dataset import SalientThermalDataset
 
 # dataloader for training
-def get_loader(image_root, gt_root, ti_root, batchsize, trainsize, shuffle=True, num_workers=4, pin_memory=False):
-    dataset = SalObjDataset(image_root, gt_root, ti_root,  trainsize)
+def get_loader(image_root, gt_root, ti_root, batchsize, trainsize, shuffle=True, num_workers=4, pin_memory=False, task='RGBT'):
+    if task == 'RGBT':
+        dataset = SalientThermalDataset(image_root, gt_root, ti_root,  trainsize)
+    elif task == 'RGBD':
+        dataset = SalientDepthDataset(image_root, gt_root, ti_root,  trainsize)
+
 
     data_loader = data.DataLoader(dataset=dataset,
                                   batch_size=batchsize,
