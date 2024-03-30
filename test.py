@@ -1,73 +1,72 @@
-import torch
-import torch.nn.functional as F
-import sys
-sys.path.append('./models')
-import os
-import cv2
+from torch import device, load, cat, no_grad, sigmoid, sum, abs, numel
+from torch.cuda import is_available
+from os import makedirs
+from os.path import exists
+from cv2 import imwrite
 
+from dataloader.test_dataset import TestDataset
 from models.LSNet import LSNet
 from config import opt
 
-
-
 dataset_path = opt.test_path
+model_path = 'path_model.pth'
 
-#set device for test
-os.environ["CUDA_VISIBLE_DEVICES"] = opt.gpu_id
-print('USE GPU:', opt.gpu_id)
+# Verifica se há suporte para GPU
+my_device = device("cuda" if is_available() else "cpu")
+print('Device in use:', my_device)
 
-#load the model
-model = LSNet()
-
-#Large epoch size may not generalize well. You can choose a good model to load according to the log file and pth files saved in ('./BBSNet_cpts/') when training.
-model.load_state_dict(torch.load(''))
-model.cuda()
+# Carrega o modelo
+model = LSNet().to(my_device)
+model.load_state_dict(load(model_path, map_location=my_device))
 model.eval()
 
-
-#test
+# Teste
 test_mae = []
-if opt.task =='RGBT':
-    from dataloader.dataset import test_dataset
-    test_datasets = ['VT800','VT1000','VT5000']
+if opt.task == 'RGBT':
+    test_datasets = ['VT800', 'VT1000', 'VT5000']
 elif opt.task == 'RGBD':
-    from dataloader.dataset import test_dataset
     test_datasets = ['NJU2K', 'DES', 'LFSD', 'NLPR', 'SIP']
 else:
     raise ValueError(f"Unknown task type {opt.task}")
 
 for dataset in test_datasets:
-    mae_sum  = 0
+    mae_sum = 0
     save_path = '/' + dataset + '/'
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
+
+    if not exists(save_path):
+        makedirs(save_path)
     if opt.task == 'RGBT':
         image_root = dataset_path + dataset + '/RGB/'
         gt_root = dataset_path + dataset + '/GT/'
-        ti_root=dataset_path + dataset +'/T/'
+        ti_root = dataset_path + dataset + '/T/'
     elif opt.task == 'RGBD':
         image_root = dataset_path + dataset + '/RGB/'
         gt_root = dataset_path + dataset + '/GT/'
         ti_root = dataset_path + dataset + '/depth/'
     else:
         raise ValueError(f"Unknown task type {opt.task}")
-    test_loader = test_dataset(image_root, gt_root, ti_root, opt.testsize)
+
+    test_loader = TestDataset(image_root, gt_root, ti_root, opt.testsize, opt.task)
+
     for i in range(test_loader.size):
-        image, gt, ti, name  = test_loader.load_data()
-        gt = gt.cuda()
-        image = image.cuda()
-        ti = ti.cuda()
+        image, gt, ti, name = test_loader.load_data()
+        gt = gt.to(my_device)
+        image = image.to(my_device)
+        ti = ti.to(my_device)
+
         if opt.task == 'RGBD':
-            ti = torch.cat((ti,ti,ti),dim=1)
-        res  = model(image,ti)
-        predict = torch.sigmoid(res)
-        predict = (predict - predict.min()) / (predict.max() - predict.min() + 1e-8)
-        mae = torch.sum(torch.abs(predict - gt)) / torch.numel(gt)
-        # mae = torch.abs(predict - gt).mean()
-        mae_sum = mae.item() + mae_sum
-        predict = predict.data.cpu().numpy().squeeze()
-        # print(predict.shape)
-        print('save img to: ',save_path+name)
-        cv2.imwrite(save_path+name, predict*255)
+            ti = cat((ti, ti, ti), dim=1)
+
+        with no_grad():
+            res = model(image, ti)
+            predict = sigmoid(res)
+            predict = (predict - predict.min()) / (predict.max() - predict.min() + 1e-8)
+            mae = sum(abs(predict - gt)) / numel(gt)
+            mae_sum = mae.item() + mae_sum
+            predict = predict.cpu().numpy().squeeze()
+            print('Saving image to:', save_path + name)
+            imwrite(save_path + name, predict * 255)
+
     test_mae.append(mae_sum / test_loader.size)
+
 print('Test Done!', 'MAE', test_mae)

@@ -1,5 +1,5 @@
-import argparse
-parser = argparse.ArgumentParser()
+from argparse import ArgumentParser
+parser = ArgumentParser()
 
 task = 'RGBT'
 
@@ -17,6 +17,7 @@ parser.add_argument('--gpu_id', type=str, default='0', help='select gpu id')
 parser.add_argument('--train_root', type=str, default=f'{task}_dataset/train', help='the train images root')
 parser.add_argument('--val_root', type=str, default=f'{task}_dataset/val', help='the val images root')
 parser.add_argument('--save_path', type=str, default='Runs/train1', help='the path to save models and logs')
+
 # test(predict)
 parser.add_argument('--testsize', type=int, default=224, help='testing size')
 parser.add_argument('--test_path',type=str,default='',help='test dataset path')
