@@ -27,6 +27,7 @@ class TestDataset:
             transforms.Resize((self.testsize, self.testsize)),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])]) if self.task == 'RGBT' else transforms.Normalize([0.485], [0.229])
+        
         self.size = len(self.images)
         self.index = 0
 
@@ -34,9 +35,11 @@ class TestDataset:
         image = self.rgb_loader(self.images[self.index])
         gt = self.binary_loader(self.gts[self.index])
         ti = self.rgb_loader(self.tis[self.index]) if self.task == 'RGBT' else self.binary_loader(self.tis[self.index])
+        
         image = self.transform(image).unsqueeze(0)
         gt = self.gt_transform(gt).unsqueeze(0)
-        ti = self.tis_transform(ti).unsqueeze(0)
+        ti = self.tis_transform(ti)
+        ti = ti.unsqueeze(0)
 
         name = self.images[self.index].split('/')[-1]
         if name.endswith('.jpg'):
