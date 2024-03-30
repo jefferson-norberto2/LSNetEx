@@ -198,7 +198,7 @@ def test(test_loader, model, epoch, save_path, device):
             image = image.to(device)
             ti = ti.to(device)
             if opt.task == 'RGBD':
-                tis = cat((tis, tis, tis), dim=1)
+                ti = cat((ti, ti, ti), dim=1)
 
             res = model(image, ti)
             res = sigmoid(res)
