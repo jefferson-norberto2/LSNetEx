@@ -19,8 +19,7 @@ from config import opt
 from torch.cuda import amp
 
 from models.LSNet import LSNet
-from dataloader.dataset import get_loader
-from dataloader.test_dataset import TestDataset
+from dataloader.dataset import get_loader, test_dataset_thermal, test_dataset_depth
 
 # set the device for training
 cudnn.benchmark = True
@@ -70,7 +69,10 @@ else:
 
 # Load data loaders
 train_loader = get_loader(image_root, gt_root, ti_root, batchsize=opt.batchsize, trainsize=opt.trainsize, task=opt.task)
-test_loader = TestDataset(val_image_root, val_gt_root, val_ti_root, opt.trainsize, opt.task)
+if opt.task == 'RGBT':
+    test_loader =  test_dataset_thermal(val_image_root, val_gt_root, val_ti_root, opt.trainsize)
+else:
+    test_loader =  test_dataset_depth(val_image_root, val_gt_root, val_ti_root, opt.trainsize)
 total_step = len(train_loader)
 
 # Set up logging
