@@ -19,7 +19,8 @@ from config import opt
 from torch.cuda import amp
 
 from models.LSNet import LSNet
-from dataloader.dataset import get_loader, test_dataset
+from dataloader.dataset import get_loader
+from dataloader.test_dataset import TestDataset
 
 # set the device for training
 cudnn.benchmark = True
@@ -69,7 +70,7 @@ else:
 
 # Load data loaders
 train_loader = get_loader(image_root, gt_root, ti_root, batchsize=opt.batchsize, trainsize=opt.trainsize, task=opt.task)
-test_loader = test_dataset(val_image_root, val_gt_root, val_ti_root, opt.trainsize)
+test_loader = TestDataset(val_image_root, val_gt_root, val_ti_root, opt.trainsize, opt.task)
 total_step = len(train_loader)
 
 # Set up logging
