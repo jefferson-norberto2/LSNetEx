@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 parser = ArgumentParser()
 
-task = 'RGBT'
+task = 'RGBD'
 
 # train/val
 parser.add_argument('--task', type=str, default=task, help='type task (RGBT or RGBD)')
@@ -20,5 +20,7 @@ parser.add_argument('--save_path', type=str, default='Runs/train1', help='the pa
 
 # test(predict)
 parser.add_argument('--testsize', type=int, default=224, help='testing size')
-parser.add_argument('--test_path',type=str,default='',help='test dataset path')
+parser.add_argument('--test_path',type=str,default='RGBD_dataset/test/',help='test dataset path')
+parser.add_argument('--test_save_path', type=str, default='./Test/', help='path to save run test')
+parser.add_argument('--model_path', type=str, default='Runs/train1Net_epoch_best.pth', help='path to model')
 opt = parser.parse_args()

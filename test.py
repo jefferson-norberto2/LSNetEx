@@ -4,12 +4,12 @@ from os import makedirs
 from os.path import exists
 from cv2 import imwrite
 
-from dataloader.test_dataset import TestDataset
+from dataloader.dataset import test_dataset_depth, test_dataset_thermal
 from models.LSNet import LSNet
 from config import opt
 
 dataset_path = opt.test_path
-model_path = 'path_model.pth'
+model_path = opt.model_path
 
 # Verifica se há suporte para GPU
 my_device = device("cuda" if is_available() else "cpu")
@@ -31,7 +31,8 @@ else:
 
 for dataset in test_datasets:
     mae_sum = 0
-    save_path = '/' + dataset + '/'
+    save_path = opt.test_save_path
+    save_path = dataset + '/'
 
     if not exists(save_path):
         makedirs(save_path)
@@ -39,14 +40,15 @@ for dataset in test_datasets:
         image_root = dataset_path + dataset + '/RGB/'
         gt_root = dataset_path + dataset + '/GT/'
         ti_root = dataset_path + dataset + '/T/'
+        test_loader = test_dataset_thermal(image_root, gt_root, ti_root, opt.testsize)
     elif opt.task == 'RGBD':
         image_root = dataset_path + dataset + '/RGB/'
         gt_root = dataset_path + dataset + '/GT/'
         ti_root = dataset_path + dataset + '/depth/'
+        test_loader = test_dataset_depth(image_root, gt_root, ti_root, opt.testsize)
     else:
         raise ValueError(f"Unknown task type {opt.task}")
 
-    test_loader = TestDataset(image_root, gt_root, ti_root, opt.testsize, opt.task)
 
     for i in range(test_loader.size):
         image, gt, ti, name = test_loader.load_data()

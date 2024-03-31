@@ -3,5 +3,7 @@ Runs/*
 __pycache__/*
 RGBT_dataset/*
 RGBD_dataset/*
+Test/*
 
 *.pyc
+*.pth
