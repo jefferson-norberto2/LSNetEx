@@ -1,81 +1,8 @@
-from torch import sigmoid, sum, norm, div, pow, cat
-from torch.nn import Module, Sequential, Conv2d, ReLU, AdaptiveAvgPool2d, UpsamplingBilinear2d, GELU, BatchNorm2d
-from torch.nn.init import kaiming_normal_, constant_
-from models.mobilenetv3 import mobilenet_v3_small_ex, mobilenet_v3_large_ex
-
-class AFD_semantic(Module):
-    '''
-    Pay Attention to Features, Transfer Learn Faster CNNs
-    https://openreview.net/pdf?id=ryxyCeHtPB
-    '''
-
-    def __init__(self, in_channels, att_f):
-        super(AFD_semantic, self).__init__()
-        mid_channels = int(in_channels * att_f)
-
-        self.attention = Sequential(*[
-            Conv2d(in_channels, mid_channels, 3, 1, 1, bias=True),
-            ReLU(inplace=True),
-            Conv2d(mid_channels, in_channels, 3, 1, 1, bias=True)
-        ])
-        self.avg_pool = AdaptiveAvgPool2d(1)
-
-        for m in self.modules():
-            if isinstance(m, Conv2d):
-                kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-                if m.bias is not None:
-                    constant_(m.bias, 0)
-
-    def forward(self, fm_s, fm_t, eps=1e-6):
-
-        fm_t_pooled = self.avg_pool(fm_t)
-        rho = self.attention(fm_t_pooled)
-        rho = sigmoid(rho.squeeze())
-        rho = rho / sum(rho, dim=1, keepdim=True)
-
-        fm_s_norm = norm(fm_s, dim=(2, 3), keepdim=True)
-        fm_s = div(fm_s, fm_s_norm + eps)
-        fm_t_norm = norm(fm_t, dim=(2, 3), keepdim=True)
-        fm_t = div(fm_t, fm_t_norm + eps)
-
-        loss = rho * pow(fm_s - fm_t, 2).mean(dim=(2, 3))
-        loss = loss.sum(1).mean(0)
-
-        return loss
-
-
-class AFD_spatial(Module):
-    '''
-    Pay Attention to Features, Transfer Learn Faster CNNs
-    https://openreview.net/pdf?id=ryxyCeHtPB
-    '''
-
-    def __init__(self, in_channels):
-        super(AFD_spatial, self).__init__()
-
-        self.attention = Sequential(*[
-            Conv2d(in_channels, 1, 3, 1, 1)
-        ])
-
-        for m in self.modules():
-            if isinstance(m, Conv2d):
-                kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-                if m.bias is not None:
-                    constant_(m.bias, 0)
-
-    def forward(self, fm_s, fm_t, eps=1e-6):
-
-        rho = self.attention(fm_t)
-        rho = sigmoid(rho)
-        rho = rho / sum(rho, dim=(2,3), keepdim=True)
-
-        fm_s_norm = norm(fm_s, dim=1, keepdim=True)
-        fm_s = div(fm_s, fm_s_norm + eps)
-        fm_t_norm = norm(fm_t, dim=1, keepdim=True)
-        fm_t = div(fm_t, fm_t_norm + eps)
-        loss = rho * pow(fm_s - fm_t, 2).mean(dim=1, keepdim=True)
-        loss =sum(loss,dim=(2,3)).mean(0)
-        return loss
+from torch import cat
+from torch.nn import Module, Sequential, Conv2d, UpsamplingBilinear2d, GELU, BatchNorm2d
+from models.afd_semantic import AFD_semantic
+from models.afd_spatial import AFD_spatial
+from models.mobilenetv3 import mobilenet_v3_large_ex
 
 class LSNet(Module):
     """
