@@ -26,13 +26,6 @@ class MobileNetV3Ex(MobileNetV3):
         out6 = x
         x = self.features[15:](x)
         out7 = x
-        
-
-        # out1 = interpolate(out1, scale_factor=2, mode='bilinear', align_corners=False)
-
-        # out2 = interpolate(out2, scale_factor=2, mode='bilinear', align_corners=False)
-
-        # out3 = interpolate(out3, scale_factor=2, mode='bilinear', align_corners=False)
 
         out5 = interpolate(out5, scale_factor=0.5, mode='bilinear', align_corners=False)
 
