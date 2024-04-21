@@ -8,10 +8,33 @@ from torchvision.models._api import WeightsEnum
 from torchvision.models._utils import _ovewrite_named_param
 
 class MobileNetV3Ex(MobileNetV3):
+    """
+    Extended version of MobileNetV3 model.
+
+    Args:
+        inverted_residual_setting (List[InvertedResidualConfig]): List of inverted residual settings.
+        last_channel (int): Number of output channels of the final convolutional layer.
+        num_classes (int, optional): Number of classes for classification. Defaults to 1000.
+        block (Callable[..., Module] | None, optional): Custom block for the architecture. Defaults to None.
+        norm_layer (Callable[..., Module] | None, optional): Custom normalization layer. Defaults to None.
+        dropout (float, optional): Dropout rate. Defaults to 0.2.
+        **kwargs (Any): Additional keyword arguments for model initialization.
+
+    """
     def __init__(self, inverted_residual_setting: List[InvertedResidualConfig], last_channel: int, num_classes: int = 1000, block: Callable[..., Module] | None = None, norm_layer: Callable[..., Module] | None = None, dropout: float = 0.2, **kwargs: Any) -> None:
         super().__init__(inverted_residual_setting, last_channel, num_classes, block, norm_layer, dropout, **kwargs)
     
     def _forward_impl(self, x: Tensor) -> Tensor:
+        """
+        Defines the forward pass of the model.
+
+        Args:
+            x (Tensor): Input tensor.
+
+        Returns:
+            Tensor: Output tensors from various intermediate layers.
+
+        """
         x = self.features[:2](x)
         out1 = x
         x = self.features[2:4](x)
@@ -34,6 +57,18 @@ class MobileNetV3Ex(MobileNetV3):
 def mobilenet_v3_small_ex(
     *, weights: Optional[MobileNet_V3_Small_Weights] = None, progress: bool = True, **kwargs: Any
 ) -> MobileNetV3Ex:
+    """
+    Constructs a MobileNetV3 small model with extended functionality.
+
+    Args:
+        weights (Optional[MobileNet_V3_Small_Weights], optional): Pre-trained weights. Defaults to None.
+        progress (bool, optional): If True, displays a progress bar of the download. Defaults to True.
+        **kwargs (Any): Additional keyword arguments for model initialization.
+
+    Returns:
+        MobileNetV3Ex: An instance of MobileNetV3Ex model.
+
+    """
     weights = MobileNet_V3_Small_Weights.verify(weights)
 
     inverted_residual_setting, last_channel = _mobilenet_v3_conf("mobilenet_v3_small", **kwargs)
@@ -42,6 +77,18 @@ def mobilenet_v3_small_ex(
 def mobilenet_v3_large_ex(
     *, weights: Optional[MobileNet_V3_Large_Weights] = None, progress: bool = True, **kwargs: Any
 ) -> MobileNetV3:
+    """
+    Constructs a MobileNetV3 large model with extended functionality.
+
+    Args:
+        weights (Optional[MobileNet_V3_Large_Weights], optional): Pre-trained weights. Defaults to None.
+        progress (bool, optional): If True, displays a progress bar of the download. Defaults to True.
+        **kwargs (Any): Additional keyword arguments for model initialization.
+
+    Returns:
+        MobileNetV3: An instance of MobileNetV3 model.
+
+    """
     weights = MobileNet_V3_Large_Weights.verify(weights)
 
     inverted_residual_setting, last_channel = _mobilenet_v3_conf("mobilenet_v3_large", **kwargs)
@@ -54,6 +101,20 @@ def _mobilenet_v3_ex(
     progress: bool,
     **kwargs: Any,
 ) -> MobileNetV3Ex:
+    """
+    Constructs a MobileNetV3Ex model.
+
+    Args:
+        inverted_residual_setting (List[InvertedResidualConfig]): List of inverted residual settings.
+        last_channel (int): Number of output channels of the final convolutional layer.
+        weights (Optional[WeightsEnum]): Pre-trained weights.
+        progress (bool): If True, displays a progress bar of the download.
+        **kwargs (Any): Additional keyword arguments for model initialization.
+
+    Returns:
+        MobileNetV3Ex: An instance of MobileNetV3Ex model.
+
+    """
     if weights is not None:
         _ovewrite_named_param(kwargs, "num_classes", len(weights.meta["categories"]))
 
