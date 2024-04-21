@@ -18,12 +18,15 @@ class MobileNetV3Ex(MobileNetV3):
         out2 = x
         x = self.features[4:7](x)
         out3 = x
-        x = self.features[7:11](x)
+        x = self.features[7:10](x)
         out4 = x
-        x = self.features[11:16](x)
+        x = self.features[10:12](x)
         out5 = x
-        x = self.features[16:](x)
+        x = self.features[12:15](x)
         out6 = x
+        x = self.features[15:](x)
+        out7 = x
+        
 
         # out1 = interpolate(out1, scale_factor=2, mode='bilinear', align_corners=False)
 
@@ -31,9 +34,9 @@ class MobileNetV3Ex(MobileNetV3):
 
         # out3 = interpolate(out3, scale_factor=2, mode='bilinear', align_corners=False)
 
-        # out4 = interpolate(out4, scale_factor=2, mode='bilinear', align_corners=False)
+        out5 = interpolate(out5, scale_factor=0.5, mode='bilinear', align_corners=False)
 
-        return out1, out2, out3, out4, out5, out6
+        return out1, out2, out3, out4, out5, out6, out7
 
 def mobilenet_v3_small_ex(
     *, weights: Optional[MobileNet_V3_Small_Weights] = None, progress: bool = True, **kwargs: Any
