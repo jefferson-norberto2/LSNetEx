@@ -8,3 +8,6 @@ Test/*
 *.zip
 *.pyc
 *.pth
+*.png
+*.jpg
+*.jpeg

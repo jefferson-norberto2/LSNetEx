@@ -4,7 +4,7 @@ from models.afd_semantic import AFD_semantic
 from models.afd_spatial import AFD_spatial
 from models.mobilenetv3 import mobilenet_v3_large_ex
 
-class LSNet(Module):
+class LSNetEx(Module):
     """
     LSNet (Light Semantic Network) model for RGB and depth/thermal image fusion.
 
@@ -20,7 +20,7 @@ class LSNet(Module):
 
     """
     def __init__(self):
-        super(LSNet, self).__init__()
+        super(LSNetEx, self).__init__()
         self.rgb_pretrained = mobilenet_v3_large_ex(pretrained=True)
         self.depth_pretrained = mobilenet_v3_large_ex(pretrained=True)
 

@@ -18,7 +18,7 @@ from torch.backends import cudnn
 from config import opt
 from torch.cuda import amp
 
-from models.LSNet import LSNet
+from models.LSNetEx import LSNetEx
 from dataloader.dataset import get_loader, test_dataset_thermal, test_dataset_depth
 
 # set the device for training
@@ -28,7 +28,7 @@ cudnn.enabled = True
 environ["CUDA_VISIBLE_DEVICES"] = opt.gpu_id
 
 # build the model
-model = LSNet()
+model = LSNetEx()
 params = model.parameters()
 optimizer = Adam(params, opt.lr)
 

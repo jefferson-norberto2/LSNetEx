@@ -1,11 +1,12 @@
 from torch import device, load, cat, no_grad, sigmoid, sum, abs, numel
 from torch.cuda import is_available
-from os import makedirs
-from os.path import exists
-from cv2 import imwrite
+# from os import makedirs
+# from os.path import exists
+# from cv2 import imwrite
+from tqdm import tqdm
 
 from dataloader.dataset import test_dataset_depth, test_dataset_thermal
-from models.LSNet import LSNet
+from models.LSNetEx import LSNetEx
 from config import opt
 
 dataset_path = opt.test_path
@@ -16,7 +17,7 @@ my_device = device("cuda" if is_available() else "cpu")
 print('Device in use:', my_device)
 
 # Carrega o modelo
-model = LSNet().to(my_device)
+model = LSNetEx().to(my_device)
 model.load_state_dict(load(model_path, map_location=my_device))
 model.eval()
 
@@ -33,9 +34,10 @@ for dataset in test_datasets:
     mae_sum = 0
     save_path = opt.test_save_path
     save_path = dataset + '/'
+    print(f'Dataset: {save_path}')
 
-    if not exists(save_path):
-        makedirs(save_path)
+    # if not exists(save_path):
+    #     makedirs(save_path)
     if opt.task == 'RGBT':
         image_root = dataset_path + dataset + '/RGB/'
         gt_root = dataset_path + dataset + '/GT/'
@@ -50,7 +52,7 @@ for dataset in test_datasets:
         raise ValueError(f"Unknown task type {opt.task}")
 
 
-    for i in range(test_loader.size):
+    for i in tqdm(range(test_loader.size)):
         image, gt, ti, name = test_loader.load_data()
         gt = gt.to(my_device)
         image = image.to(my_device)
@@ -66,8 +68,8 @@ for dataset in test_datasets:
             mae = sum(abs(predict - gt)) / numel(gt)
             mae_sum = mae.item() + mae_sum
             predict = predict.cpu().numpy().squeeze()
-            print('Saving image to:', save_path + name)
-            imwrite(save_path + name, predict * 255)
+            # print('Saving image to:', save_path + name)
+            # imwrite(save_path + name, predict * 255)
 
     test_mae.append(mae_sum / test_loader.size)
 
