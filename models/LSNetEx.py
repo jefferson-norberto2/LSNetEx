@@ -25,8 +25,10 @@ class LSNetEx(Module):
         self.is_large = is_large
 
         if self.is_large:
+            print('LsNet - Large')
             self._load_large()
         else:
+            print('LsNet - Small')
             self._load_small()
 
     def _load_large(self):

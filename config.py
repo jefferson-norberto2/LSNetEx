@@ -5,7 +5,7 @@ task = 'RGBD'
 
 # train/val
 parser.add_argument('--task', type=str, default=task, help='type task (RGBT or RGBD)')
-parser.add_argument('--epoch', type=int, default=100, help='epoch number')
+parser.add_argument('--epoch', type=int, default=20, help='epoch number')
 parser.add_argument('--lr', type=float, default=0.0001, help='learning rate')
 parser.add_argument('--batchsize', type=int, default=16, help='training batch size')
 parser.add_argument('--trainsize', type=int, default=224, help='training dataset size')

@@ -50,7 +50,7 @@ class MobileNetV3Large(MobileNetV3):
         x = self.features[15:](x)
         out7 = x
 
-        out5 = interpolate(out5, scale_factor=0.5, mode='bilinear', align_corners=False)
+        # out5 = interpolate(out5, scale_factor=0.5, mode='bilinear', align_corners=False)
 
         return out1, out2, out3, out4, out5, out6, out7
 
