@@ -1,13 +1,13 @@
 from typing import Any, Callable, List
 from torch import Tensor
 from torch.nn.modules import Module
-from torchvision.models.mobilenetv3 import _mobilenet_v3_conf, MobileNetV3, MobileNet_V3_Small_Weights, MobileNet_V3_Large_Weights, InvertedResidualConfig
+from torchvision.models.mobilenetv3 import _mobilenet_v3_conf, MobileNetV3, MobileNet_V3_Small_Weights, InvertedResidualConfig
 from torch.nn.functional import interpolate
 from typing import Optional
 from torchvision.models._api import WeightsEnum
 from torchvision.models._utils import _ovewrite_named_param
 
-class MobileNetV3Ex(MobileNetV3):
+class MobileNetV3Small(MobileNetV3):
     """
     Extended version of MobileNetV3 model.
 
@@ -35,28 +35,28 @@ class MobileNetV3Ex(MobileNetV3):
             Tensor: Output tensors from various intermediate layers.
 
         """
+
         x = self.features[:2](x)
         out1 = x
-        x = self.features[2:4](x)
+        x = self.features[2:3](x)
         out2 = x
-        x = self.features[4:7](x)
+        x = self.features[3:7](x)
         out3 = x
-        x = self.features[7:10](x)
+        x = self.features[7:12](x)
         out4 = x
-        x = self.features[10:12](x)
+        x = self.features[12:](x)
         out5 = x
-        x = self.features[12:15](x)
-        out6 = x
-        x = self.features[15:](x)
-        out7 = x
 
-        out5 = interpolate(out5, scale_factor=0.5, mode='bilinear', align_corners=False)
+        out1 = interpolate(out1, scale_factor=2, mode='bilinear', align_corners=False)
+        out2 = interpolate(out2, scale_factor=2, mode='bilinear', align_corners=False)
+        out3 = interpolate(out3, scale_factor=2, mode='bilinear', align_corners=False)
+        out4 = interpolate(out4, scale_factor=2, mode='bilinear', align_corners=False)
 
-        return out1, out2, out3, out4, out5, out6, out7
+        return out1, out2, out3, out4, out5
 
 def mobilenet_v3_small_ex(
     *, weights: Optional[MobileNet_V3_Small_Weights] = None, progress: bool = True, **kwargs: Any
-) -> MobileNetV3Ex:
+) -> MobileNetV3Small:
     """
     Constructs a MobileNetV3 small model with extended functionality.
 
@@ -74,33 +74,13 @@ def mobilenet_v3_small_ex(
     inverted_residual_setting, last_channel = _mobilenet_v3_conf("mobilenet_v3_small", **kwargs)
     return _mobilenet_v3_ex(inverted_residual_setting, last_channel, weights, progress, **kwargs)
 
-def mobilenet_v3_large_ex(
-    *, weights: Optional[MobileNet_V3_Large_Weights] = None, progress: bool = True, **kwargs: Any
-) -> MobileNetV3:
-    """
-    Constructs a MobileNetV3 large model with extended functionality.
-
-    Args:
-        weights (Optional[MobileNet_V3_Large_Weights], optional): Pre-trained weights. Defaults to None.
-        progress (bool, optional): If True, displays a progress bar of the download. Defaults to True.
-        **kwargs (Any): Additional keyword arguments for model initialization.
-
-    Returns:
-        MobileNetV3: An instance of MobileNetV3 model.
-
-    """
-    weights = MobileNet_V3_Large_Weights.verify(weights)
-
-    inverted_residual_setting, last_channel = _mobilenet_v3_conf("mobilenet_v3_large", **kwargs)
-    return _mobilenet_v3_ex(inverted_residual_setting, last_channel, weights, progress, **kwargs)
-
 def _mobilenet_v3_ex(
     inverted_residual_setting: List[InvertedResidualConfig],
     last_channel: int,
     weights: Optional[WeightsEnum],
     progress: bool,
     **kwargs: Any,
-) -> MobileNetV3Ex:
+) -> MobileNetV3Small:
     """
     Constructs a MobileNetV3Ex model.
 
@@ -118,7 +98,7 @@ def _mobilenet_v3_ex(
     if weights is not None:
         _ovewrite_named_param(kwargs, "num_classes", len(weights.meta["categories"]))
 
-    model = MobileNetV3Ex(inverted_residual_setting, last_channel, **kwargs)
+    model = MobileNetV3Small(inverted_residual_setting, last_channel, **kwargs)
 
     if weights is not None:
         model.load_state_dict(weights.get_state_dict(progress=progress, check_hash=True))
@@ -127,7 +107,7 @@ def _mobilenet_v3_ex(
 
 if __name__ == '__main__':
     import torch
-    model = mobilenet_v3_large_ex(pretrained=True)
+    model = mobilenet_v3_small_ex(pretrained=True)
     rgb = torch.randn(1, 3, 224, 224)
     out = model(rgb)
     for i in out:
