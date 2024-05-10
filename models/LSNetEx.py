@@ -21,15 +21,16 @@ class LSNetEx(Module):
         forward(rgb: Tensor, ti: Tensor) -> Tuple[Tensor, Tensor, Tensor, Tensor]: Forward pass of the LSNet model.
 
     """
-    def __init__(self, is_large=True):
+    def __init__(self, is_large=True, is_v2=False):
         super(LSNetEx, self).__init__()
         self.is_large = is_large
+        self.is_v2 = is_v2
 
         if self.is_large:
             print('LsNet - Large')
             self._load_large()
         elif self.is_v2:
-            ...
+            self._load_v2()
         else:
             print('LsNet - Small')
             self._load_small()
@@ -102,7 +103,7 @@ class LSNetEx(Module):
             self.AFD_spatial_2_R_T = AFD_spatial(24)
             self.AFD_spatial_1_R_T = AFD_spatial(16)
 
-    def _load_mbv2(self):
+    def _load_v2(self):
         self.rgb_pretrained = mobilenet_v2()
         self.depth_pretrained = mobilenet_v2()
 

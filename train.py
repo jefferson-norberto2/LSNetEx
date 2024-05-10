@@ -28,7 +28,7 @@ cudnn.enabled = True
 environ["CUDA_VISIBLE_DEVICES"] = opt.gpu_id
 
 # build the model
-model = LSNetEx(is_large=True)
+model = LSNetEx(is_large=True, is_v2=False)
 params = model.parameters()
 optimizer = Adam(params, opt.lr)
 

@@ -49,7 +49,7 @@ class MobileNetV3Large(MobileNetV3):
         return out1, out2, out3, out4, out5
 
 def mobilenet_v3_large_ex(
-    *, weights: Optional[MobileNet_V3_Large_Weights] = None, progress: bool = True, **kwargs: Any
+    *, weights: Optional[MobileNet_V3_Large_Weights] = MobileNet_V3_Large_Weights.IMAGENET1K_V2, progress: bool = True, **kwargs: Any
 ) -> MobileNetV3:
     """
     Constructs a MobileNetV3 large model with extended functionality.
