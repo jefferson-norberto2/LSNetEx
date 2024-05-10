@@ -43,16 +43,10 @@ class MobileNetV3Large(MobileNetV3):
         out3 = x
         x = self.features[7:10](x)
         out4 = x
-        x = self.features[10:12](x)
+        x = self.features[10:](x)
         out5 = x
-        x = self.features[12:15](x)
-        out6 = x
-        x = self.features[15:](x)
-        out7 = x
 
-        # out5 = interpolate(out5, scale_factor=0.5, mode='bilinear', align_corners=False)
-
-        return out1, out2, out3, out4, out5, out6, out7
+        return out1, out2, out3, out4, out5
 
 def mobilenet_v3_large_ex(
     *, weights: Optional[MobileNet_V3_Large_Weights] = None, progress: bool = True, **kwargs: Any
