@@ -21,19 +21,21 @@ class LSNetEx(Module):
         forward(rgb: Tensor, ti: Tensor) -> Tuple[Tensor, Tensor, Tensor, Tensor]: Forward pass of the LSNet model.
 
     """
-    def __init__(self, is_large=True, is_v2=False):
+    def __init__(self, network=0):
         super(LSNetEx, self).__init__()
-        self.is_large = is_large
-        self.is_v2 = is_v2
+        self.network = network
 
-        if self.is_large:
-            print('LsNet - Large')
+        if self.network == 0:
+            print('LsNet - V3Large')
             self._load_large()
-        elif self.is_v2:
+        elif self.network == 1:
+            print('LsNet - V3Small')
+            self._load_small()
+        elif self.network == 2:
+            print('LsNet - V2')
             self._load_v2()
         else:
-            print('LsNet - Small')
-            self._load_small()
+            raise Exception('Invalid option network.')
 
     def _load_large(self):
         self.rgb_pretrained = mobilenet_v3_large_ex(pretrained=True)
