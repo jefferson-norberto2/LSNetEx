@@ -4,7 +4,6 @@ from torch.nn.modules import Module
 from torchvision.models.mobilenetv3 import _mobilenet_v3_conf, MobileNetV3, MobileNet_V3_Small_Weights, InvertedResidualConfig
 from torch.nn.functional import interpolate
 from typing import Optional
-from torchvision.models._api import WeightsEnum
 from torchvision.models._utils import _ovewrite_named_param
 
 class MobileNetV3Small(MobileNetV3):
@@ -72,29 +71,7 @@ def mobilenet_v3_small_ex(
     weights = MobileNet_V3_Small_Weights.verify(weights)
 
     inverted_residual_setting, last_channel = _mobilenet_v3_conf("mobilenet_v3_small", **kwargs)
-    return _mobilenet_v3_ex(inverted_residual_setting, last_channel, weights, progress, **kwargs)
-
-def _mobilenet_v3_ex(
-    inverted_residual_setting: List[InvertedResidualConfig],
-    last_channel: int,
-    weights: Optional[WeightsEnum],
-    progress: bool,
-    **kwargs: Any,
-) -> MobileNetV3Small:
-    """
-    Constructs a MobileNetV3Ex model.
-
-    Args:
-        inverted_residual_setting (List[InvertedResidualConfig]): List of inverted residual settings.
-        last_channel (int): Number of output channels of the final convolutional layer.
-        weights (Optional[WeightsEnum]): Pre-trained weights.
-        progress (bool): If True, displays a progress bar of the download.
-        **kwargs (Any): Additional keyword arguments for model initialization.
-
-    Returns:
-        MobileNetV3Ex: An instance of MobileNetV3Ex model.
-
-    """
+    
     if weights is not None:
         _ovewrite_named_param(kwargs, "num_classes", len(weights.meta["categories"]))
 
@@ -104,6 +81,7 @@ def _mobilenet_v3_ex(
         model.load_state_dict(weights.get_state_dict(progress=progress, check_hash=True))
 
     return model
+    
 
 if __name__ == '__main__':
     import torch
