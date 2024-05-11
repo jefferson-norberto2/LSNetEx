@@ -4,6 +4,7 @@ train 20 epochs, batch 16, RGBD, rate 0.0001
              MAE   Loss   l_s   l_b  l_t
 v3_small -> 0.083, 4.87, 1.31, 2.82, 0.42
 v3_large -> 0.071, 4.36, 1.15, 2.74, 0.40
-v2_mobile > 0.039, 3.18, 0.51, 2.48, 0.18 -> pre-treinado
 
+v2_mobile > 0.039, 3.18, 0.51, 2.48, 0.18 -> pre-treinado
 v3_large -> 0.035, 3.25, 0.44, 2.46, 0.25 -> pre-treinado
+v3_small -> 0.046, 3.55, 0.64, 2.59, 0.28 -> pre-treinado

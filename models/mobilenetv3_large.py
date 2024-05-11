@@ -2,9 +2,7 @@ from typing import Any, Callable, List
 from torch import Tensor
 from torch.nn.modules import Module
 from torchvision.models.mobilenetv3 import _mobilenet_v3_conf, MobileNetV3, MobileNet_V3_Large_Weights, InvertedResidualConfig
-from torch.nn.functional import interpolate
 from typing import Optional
-from torchvision.models._api import WeightsEnum
 from torchvision.models._utils import _ovewrite_named_param
 
 class MobileNetV3Large(MobileNetV3):
@@ -49,8 +47,10 @@ class MobileNetV3Large(MobileNetV3):
         return out1, out2, out3, out4, out5
 
 def mobilenet_v3_large_ex(
-    *, weights: Optional[MobileNet_V3_Large_Weights] = MobileNet_V3_Large_Weights.IMAGENET1K_V2, progress: bool = True, **kwargs: Any
-) -> MobileNetV3:
+    *, weights: Optional[MobileNet_V3_Large_Weights] = MobileNet_V3_Large_Weights.IMAGENET1K_V2, 
+    progress: bool = True, 
+    **kwargs: Any,
+    ) -> MobileNetV3Large:
     """
     Constructs a MobileNetV3 large model with extended functionality.
 
@@ -66,38 +66,16 @@ def mobilenet_v3_large_ex(
     weights = MobileNet_V3_Large_Weights.verify(weights)
 
     inverted_residual_setting, last_channel = _mobilenet_v3_conf("mobilenet_v3_large", **kwargs)
-    return _mobilenet_v3_ex(inverted_residual_setting, last_channel, weights, progress, **kwargs)
-
-def _mobilenet_v3_ex(
-    inverted_residual_setting: List[InvertedResidualConfig],
-    last_channel: int,
-    weights: Optional[WeightsEnum],
-    progress: bool,
-    **kwargs: Any,
-) -> MobileNetV3Large:
-    """
-    Constructs a MobileNetV3Ex model.
-
-    Args:
-        inverted_residual_setting (List[InvertedResidualConfig]): List of inverted residual settings.
-        last_channel (int): Number of output channels of the final convolutional layer.
-        weights (Optional[WeightsEnum]): Pre-trained weights.
-        progress (bool): If True, displays a progress bar of the download.
-        **kwargs (Any): Additional keyword arguments for model initialization.
-
-    Returns:
-        MobileNetV3Ex: An instance of MobileNetV3Ex model.
-
-    """
+    
     if weights is not None:
         _ovewrite_named_param(kwargs, "num_classes", len(weights.meta["categories"]))
-
+    
     model = MobileNetV3Large(inverted_residual_setting, last_channel, **kwargs)
 
     if weights is not None:
         model.load_state_dict(weights.get_state_dict(progress=progress, check_hash=True))
 
-    return model
+    return model    
 
 if __name__ == '__main__':
     import torch
