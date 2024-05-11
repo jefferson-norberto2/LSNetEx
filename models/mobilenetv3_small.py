@@ -55,7 +55,7 @@ class MobileNetV3Small(MobileNetV3):
         return out1, out2, out3, out4, out5
 
 def mobilenet_v3_small_ex(
-    *, weights: Optional[MobileNet_V3_Small_Weights] = MobileNet_V3_Small_Weights.DEFAULT, progress: bool = True, **kwargs: Any
+    *, weights: Optional[MobileNet_V3_Small_Weights] = MobileNet_V3_Small_Weights.IMAGENET1K_V1, progress: bool = True, **kwargs: Any
 ) -> MobileNetV3Small:
     """
     Constructs a MobileNetV3 small model with extended functionality.
