@@ -46,7 +46,6 @@ class MobileNetV3Large(MobileNetV3):
         out5 = x
         x = self.features[14:18](x)
         out6 = x
-        out6 = out6[:, :320, :]
         x = self.features[18:](x)
         out7 = x
         

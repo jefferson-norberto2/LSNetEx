@@ -42,34 +42,37 @@ class LSNetEx(Module):
         self.depth_pretrained = mobilenet_v3_large_ex(pretrained=True)
 
         # Upsample_model
-        self.upsample1_g = Sequential(Conv2d(88, 44, 3, 1, 1, ), BatchNorm2d(44), GELU(),
+        self.upsample1_g = Sequential(Conv2d(102, 51, 3, 1, 1, ), BatchNorm2d(51), GELU(),
                                          UpsamplingBilinear2d(scale_factor=2, ))
 
-        self.upsample2_g = Sequential(Conv2d(144, 72, 3, 1, 1, ), BatchNorm2d(72), GELU(),
+        self.upsample2_g = Sequential(Conv2d(174, 86, 3, 1, 1, ), BatchNorm2d(86), GELU(),
                                          UpsamplingBilinear2d(scale_factor=2, ))
 
-        self.upsample3_g = Sequential(Conv2d(240, 120, 3, 1, 1, ), BatchNorm2d(120), GELU(),
+        self.upsample3_g = Sequential(Conv2d(300, 150, 3, 1, 1, ), BatchNorm2d(150), GELU(),
                                          UpsamplingBilinear2d(scale_factor=2, ))
 
-        self.upsample4_g = Sequential(Conv2d(400, 200, 3, 1, 1, ), BatchNorm2d(200), GELU(),
+        self.upsample4_g = Sequential(Conv2d(520, 260, 3, 1, 1, ), BatchNorm2d(260), GELU(),
                                          UpsamplingBilinear2d(scale_factor=2, ))
 
-        self.upsample5_g = Sequential(Conv2d(640, 320, 3, 1, 1, ), BatchNorm2d(320), GELU(),
+        self.upsample5_g = Sequential(Conv2d(880, 440, 3, 1, 1, ), BatchNorm2d(440), GELU(),
                                          UpsamplingBilinear2d(scale_factor=2, ))
         
-        self.upsample6_g = Sequential(Conv2d(960, 480, 3, 1, 1, ), BatchNorm2d(480), GELU())
+        self.upsample6_g = Sequential(Conv2d(1440, 720, 3, 1, 1, ), BatchNorm2d(720), GELU())
         
-        self.conv_g = Conv2d(44, 1, 1)
-        self.conv2_g = Conv2d(72, 1, 1)
-        self.conv3_g = Conv2d(120, 1, 1)
+        self.upsample7_g = Sequential(Conv2d(960, 480, 3, 1, 1, ), BatchNorm2d(480), GELU())
+        
+        self.conv_g = Conv2d(51, 1, 1)
+        self.conv2_g = Conv2d(86, 1, 1)
+        self.conv3_g = Conv2d(150, 1, 1)
 
         # Tips: speed test and params and more this part is not included.
         # please comment this part when involved.
         if self.training:
+            self.AFD_semantic_7_R_T = AFD_semantic(960, 0.0625)
             self.AFD_semantic_6_R_T = AFD_semantic(960, 0.0625)
             self.AFD_semantic_5_R_T = AFD_semantic(160, 0.0625)
             self.AFD_semantic_4_R_T = AFD_semantic(80, 0.0625)
-            self.AFD_semantic_3_R_T = AFD_semantic(40, 0.0625)
+            self.AFD_spatial_4_R_T = AFD_spatial(80)
             self.AFD_spatial_3_R_T = AFD_spatial(40)
             self.AFD_spatial_2_R_T = AFD_spatial(24)
             self.AFD_spatial_1_R_T = AFD_spatial(16)
@@ -163,9 +166,10 @@ class LSNetEx(Module):
         return out
     
     def forward_large(self, rgb, ti):
-        A1, A2, A3, A4, A5, A6 = self.rgb_pretrained(rgb)
-        A1_t, A2_t, A3_t, A4_t, A5_t, A6_t = self.depth_pretrained(ti)
+        A1, A2, A3, A4, A5, A6, A7 = self.rgb_pretrained(rgb)
+        A1_t, A2_t, A3_t, A4_t, A5_t, A6_t, A7_t = self.depth_pretrained(ti)
 
+        F7 = A7_t + A7
         F6 = A6_t + A6
         F5 = A5_t + A5
         F4 = A4_t + A4
@@ -173,6 +177,8 @@ class LSNetEx(Module):
         F2 = A2_t + A2
         F1 = A1_t + A1
 
+        F7 = self.upsample7_g(F7)
+        F6 = cat((F6, F7), dim=1)
         F6 = self.upsample6_g(F6)
         F5 = cat((F5, F6), dim=1)
         F5 = self.upsample5_g(F5)
@@ -190,24 +196,27 @@ class LSNetEx(Module):
         if self.training:
             out3 = self.conv3_g(F3)
             out2 = self.conv2_g(F2)
+            loss_semantic_7_R_T = self.AFD_semantic_7_R_T(A7, A7_t.detach())
+            loss_semantic_7_T_R = self.AFD_semantic_7_R_T(A7_t, A7.detach())
             loss_semantic_6_R_T = self.AFD_semantic_6_R_T(A6, A6_t.detach())
             loss_semantic_6_T_R = self.AFD_semantic_6_R_T(A6_t, A6.detach())
             loss_semantic_5_R_T = self.AFD_semantic_5_R_T(A5, A5_t.detach())
             loss_semantic_5_T_R = self.AFD_semantic_5_R_T(A5_t, A5.detach())
             loss_semantic_4_R_T = self.AFD_semantic_4_R_T(A4, A4_t.detach())
             loss_semantic_4_T_R = self.AFD_semantic_4_R_T(A4_t, A4.detach())
-            loss_semantic_3_R_T = self.AFD_semantic_3_R_T(A3, A3_t.detach())
-            loss_semantic_3_T_R = self.AFD_semantic_3_R_T(A3_t, A3.detach())
+            loss_spatial_4_R_T = self.AFD_spatial_4_R_T(A4, A4_t.detach())
+            loss_spatial_4_T_R = self.AFD_spatial_4_R_T(A4_t, A4.detach())
             loss_spatial_3_R_T = self.AFD_spatial_3_R_T(A3, A3_t.detach())
             loss_spatial_3_T_R = self.AFD_spatial_3_R_T(A3_t, A3.detach())
             loss_spatial_2_R_T = self.AFD_spatial_2_R_T(A2, A2_t.detach())
             loss_spatial_2_T_R = self.AFD_spatial_2_R_T(A2_t, A2.detach())
             loss_spatial_1_R_T = self.AFD_spatial_1_R_T(A1, A1_t.detach())
             loss_spatial_1_T_R = self.AFD_spatial_1_R_T(A1_t, A1.detach())
-            loss_KD = loss_semantic_6_R_T + loss_semantic_6_T_R + \
+            loss_KD = loss_semantic_7_R_T + loss_semantic_7_T_R + \
+                      loss_semantic_6_R_T + loss_semantic_6_T_R + \
                       loss_semantic_5_R_T + loss_semantic_5_T_R + \
                       loss_semantic_4_R_T + loss_semantic_4_T_R + \
-                      loss_semantic_3_R_T + loss_semantic_3_T_R + \
+                      loss_spatial_4_R_T + loss_spatial_4_T_R + \
                       loss_spatial_3_R_T + loss_spatial_3_T_R + \
                       loss_spatial_2_R_T + loss_spatial_2_T_R + \
                       loss_spatial_1_R_T + loss_spatial_1_T_R

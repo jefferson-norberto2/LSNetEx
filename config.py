@@ -17,7 +17,7 @@ parser.add_argument('--load', type=str, default=None, help='train from checkpoin
 parser.add_argument('--gpu_id', type=str, default='0', help='select gpu id')
 parser.add_argument('--train_root', type=str, default=f'{task}_dataset/train/NJUNLPR', help='the train images root')
 parser.add_argument('--val_root', type=str, default=f'{task}_dataset/val/NJUNLPR', help='the val images root')
-parser.add_argument('--save_path', type=str, default='Runs/train1', help='the path to save models and logs')
+parser.add_argument('--save_path', type=str, default='Runs/train1/', help='the path to save models and logs')
 
 # test(predict)
 parser.add_argument('--testsize', type=int, default=224, help='testing size')
