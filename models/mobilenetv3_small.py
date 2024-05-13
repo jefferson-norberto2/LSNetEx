@@ -78,7 +78,7 @@ def mobilenet_v3_small_ex(
     model = MobileNetV3Small(inverted_residual_setting, last_channel, **kwargs)
 
     if weights is not None:
-        model.load_state_dict(weights.get_state_dict(progress=progress, check_hash=True))
+        model.load_state_dict(weights.get_state_dict(progress=progress))
 
     return model
     
