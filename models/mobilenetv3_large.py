@@ -41,10 +41,13 @@ class MobileNetV3Large(MobileNetV3):
         out3 = x
         x = self.features[7:10](x)
         out4 = x
-        x = self.features[10:](x)
+        x = self.features[10:14](x)
         out5 = x
+        x = self.features[14:18](x)
+        out6 = x
+        
 
-        return out1, out2, out3, out4, out5
+        return out1, out2, out3, out4, out5, out6
 
 def mobilenet_v3_large_ex(
     *, weights: Optional[MobileNet_V3_Large_Weights] = MobileNet_V3_Large_Weights.IMAGENET1K_V2, 
