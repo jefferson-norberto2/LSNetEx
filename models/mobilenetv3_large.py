@@ -2,6 +2,7 @@ from typing import Any, Callable, List
 from torch import Tensor
 from torch.nn.modules import Module
 from torchvision.models.mobilenetv3 import _mobilenet_v3_conf, MobileNetV3, MobileNet_V3_Large_Weights, InvertedResidualConfig
+from torch.nn.functional import interpolate
 from typing import Optional
 from torchvision.models._utils import _ovewrite_named_param
 
@@ -45,9 +46,12 @@ class MobileNetV3Large(MobileNetV3):
         out5 = x
         x = self.features[14:18](x)
         out6 = x
+        out6 = out6[:, :320, :]
+        x = self.features[18:](x)
+        out7 = x
         
 
-        return out1, out2, out3, out4, out5, out6
+        return out1, out2, out3, out4, out5, out6, out7
 
 def mobilenet_v3_large_ex(
     *, weights: Optional[MobileNet_V3_Large_Weights] = MobileNet_V3_Large_Weights.IMAGENET1K_V2, 
