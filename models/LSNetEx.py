@@ -76,33 +76,33 @@ class LSNetEx(Module):
         self.depth_pretrained = mobilenet_v3_small_ex()
 
         # Upsample_model
-        self.upsample1_g = Sequential(Conv2d(70, 35, 3, 1, 1, ), BatchNorm2d(35), GELU(),
+        self.upsample1_g = Sequential(Conv2d(55, 27, 3, 1, 1, ), BatchNorm2d(27), GELU(),
                                          UpsamplingBilinear2d(scale_factor=2, ))
 
-        self.upsample2_g = Sequential(Conv2d(108, 54, 3, 1, 1, ), BatchNorm2d(54), GELU(),
+        self.upsample2_g = Sequential(Conv2d(78, 39, 3, 1, 1, ), BatchNorm2d(39), GELU(),
                                          UpsamplingBilinear2d(scale_factor=2, ))
 
-        self.upsample3_g = Sequential(Conv2d(168, 84, 3, 1, 1, ), BatchNorm2d(84), GELU(),
+        self.upsample3_g = Sequential(Conv2d(124, 62, 3, 1, 1, ), BatchNorm2d(62), GELU(),
                                          UpsamplingBilinear2d(scale_factor=2, ))
 
-        self.upsample4_g = Sequential(Conv2d(256, 128, 3, 1, 1, ), BatchNorm2d(128), GELU(),
+        self.upsample4_g = Sequential(Conv2d(200, 100, 3, 1, 1, ), BatchNorm2d(100), GELU(),
                                          UpsamplingBilinear2d(scale_factor=2, ))
 
         self.upsample5_g = Sequential(Conv2d(576, 160, 3, 1, 1, ), BatchNorm2d(160), GELU(),
                                          UpsamplingBilinear2d(scale_factor=2, ))
         
-        self.conv_g = Conv2d(35, 1, 1)
-        self.conv2_g = Conv2d(54, 1, 1)
-        self.conv3_g = Conv2d(84, 1, 1)
+        self.conv_g = Conv2d(27, 1, 1)
+        self.conv2_g = Conv2d(39, 1, 1)
+        self.conv3_g = Conv2d(62, 1, 1)
 
         # Tips: speed test and params and more this part is not included.
         # please comment this part when involved.
         if self.training:
             self.AFD_semantic_5_R_T = AFD_semantic(576, 0.0625)
-            self.AFD_semantic_4_R_T = AFD_semantic(96, 0.0625)
-            self.AFD_semantic_3_R_T = AFD_semantic(40, 0.0625)
-            self.AFD_spatial_3_R_T = AFD_spatial(40)
-            self.AFD_spatial_2_R_T = AFD_spatial(24)
+            self.AFD_semantic_4_R_T = AFD_semantic(40, 0.0625)
+            self.AFD_semantic_3_R_T = AFD_semantic(24, 0.0625)
+            self.AFD_spatial_3_R_T = AFD_spatial(24)
+            self.AFD_spatial_2_R_T = AFD_spatial(16)
             self.AFD_spatial_1_R_T = AFD_spatial(16)
 
     def _load_v2(self):

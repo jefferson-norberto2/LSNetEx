@@ -35,21 +35,16 @@ class MobileNetV3Small(MobileNetV3):
 
         """
 
-        x = self.features[:2](x)
+        x = self.features[:1](x)
         out1 = x
-        x = self.features[2:3](x)
+        x = self.features[1:2](x)
         out2 = x
-        x = self.features[3:7](x)
+        x = self.features[2:4](x)
         out3 = x
-        x = self.features[7:12](x)
+        x = self.features[4:6](x)
         out4 = x
-        x = self.features[12:](x)
+        x = self.features[6:](x)
         out5 = x
-
-        out1 = interpolate(out1, scale_factor=2, mode='bilinear', align_corners=False)
-        out2 = interpolate(out2, scale_factor=2, mode='bilinear', align_corners=False)
-        out3 = interpolate(out3, scale_factor=2, mode='bilinear', align_corners=False)
-        out4 = interpolate(out4, scale_factor=2, mode='bilinear', align_corners=False)
 
         return out1, out2, out3, out4, out5
 
