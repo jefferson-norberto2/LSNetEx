@@ -43,7 +43,7 @@ class MobileNetV3Small(MobileNetV3):
         out3 = x
         x = self.features[4:6](x)
         out4 = x
-        x = self.features[6:](x)
+        x = self.features[6:14](x)
         out5 = x
 
         return out1, out2, out3, out4, out5

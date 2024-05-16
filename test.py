@@ -17,14 +17,14 @@ my_device = device("cuda" if is_available() else "cpu")
 print('Device in use:', my_device)
 
 # Carrega o modelo
-model = LSNetEx().to(my_device)
+model = LSNetEx(network=opt.network).to(my_device)
 model.load_state_dict(load(model_path, map_location=my_device))
 model.eval()
 
 # Teste
 test_mae = []
 if opt.task == 'RGBT':
-    test_datasets = ['VT800', 'VT1000', 'VT5000']
+    test_datasets = ['VT821', 'VT1000', 'VT5000']
 elif opt.task == 'RGBD':
     test_datasets = ['NJU2K', 'DES', 'LFSD', 'NLPR', 'SIP']
 else:

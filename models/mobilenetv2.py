@@ -2,7 +2,6 @@ from typing import Any, Callable, List
 from torch import Tensor
 from torch.nn.modules import Module
 from torchvision.models.mobilenetv2 import MobileNetV2, MobileNet_V2_Weights
-from torch.nn.functional import interpolate
 from typing import Optional
 from torchvision.models._utils import _ovewrite_named_param
 
