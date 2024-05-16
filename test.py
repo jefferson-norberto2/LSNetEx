@@ -24,7 +24,7 @@ model.eval()
 # Teste
 test_mae = []
 if opt.task == 'RGBT':
-    test_datasets = ['VT800', 'VT1000', 'VT5000']
+    test_datasets = ['VT821', 'VT1000', 'VT5000']
 elif opt.task == 'RGBD':
     test_datasets = ['NJU2K', 'DES', 'LFSD', 'NLPR', 'SIP']
 else:
