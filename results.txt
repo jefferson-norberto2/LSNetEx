@@ -1,11 +1,5 @@
 
-train 20 epochs, batch 16, RGBD, rate 0.0001
-
-             MAE   Loss   l_s   l_b  l_t
-v2_mobile > 0.041, 3.18, 0.51, 2.48, 0.18 -> pytorch
-v3_large -> 0.035, 3.15, 0.46, 2.45, 0.24 -> pytorch
-v3_small -> 0.048, 3.52, 0.73, 2.58, 0.26 -> pytorch
-v2_mobile > 0.041, 3.55, 0.66, 2.52, 0.43 -> original
+train 20 epochs, batch 10, RGBT, rate 0.0001
 
 Test:           
                 VT0821, VT1000, VT2500 
@@ -24,6 +18,3 @@ v3_large_2d ->  0.030,  0.021,  0.034
 v2_artigo   ->  0.033,  0.022,  0.036
                 0.037,  0.023,  0.036
 21,5 MB         38s,    42s,    1m 46s
-
-
-
