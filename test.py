@@ -6,6 +6,7 @@ from torch.cuda import is_available
 from tqdm import tqdm
 
 from dataloader.dataset import test_dataset_depth, test_dataset_thermal
+from dataloader.test_dataset import TestDataset
 from models.LSNetEx import LSNetEx
 from config import opt
 
@@ -42,12 +43,12 @@ for dataset in test_datasets:
         image_root = dataset_path + dataset + '/RGB/'
         gt_root = dataset_path + dataset + '/GT/'
         ti_root = dataset_path + dataset + '/T/'
-        test_loader = test_dataset_thermal(image_root, gt_root, ti_root, opt.testsize)
+        test_loader = TestDataset(image_root, gt_root, ti_root, opt.testsize, task='RGBT')
     elif opt.task == 'RGBD':
         image_root = dataset_path + dataset + '/RGB/'
         gt_root = dataset_path + dataset + '/GT/'
         ti_root = dataset_path + dataset + '/depth/'
-        test_loader = test_dataset_depth(image_root, gt_root, ti_root, opt.testsize)
+        test_loader = TestDataset(image_root, gt_root, ti_root, opt.testsize, task='RGBD')
     else:
         raise ValueError(f"Unknown task type {opt.task}")
 
