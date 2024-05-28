@@ -66,8 +66,10 @@ class MobileNetV2Ex(MobileNetV2):
 
 
 def mobilenet_v2(
-    *, weights: Optional[MobileNet_V2_Weights] = MobileNet_V2_Weights.IMAGENET1K_V2, progress: bool = True, **kwargs: Any
-) -> MobileNetV2Ex:
+    weights: Optional[MobileNet_V2_Weights] = MobileNet_V2_Weights.IMAGENET1K_V2, 
+    progress: bool = True, 
+    **kwargs: Any,
+    ) -> MobileNetV2Ex:
     """MobileNetV2 architecture from the `MobileNetV2: Inverted Residuals and Linear
     Bottlenecks <https://arxiv.org/abs/1801.04381>`_ paper.
 
@@ -87,11 +89,6 @@ def mobilenet_v2(
     .. autoclass:: torchvision.models.MobileNet_V2_Weights
         :members:
     """
-    weights = MobileNet_V2_Weights.verify(weights)
-
-    if weights is not None:
-        _ovewrite_named_param(kwargs, "num_classes", len(weights.meta["categories"]))
-
     model = MobileNetV2Ex(**kwargs)
 
     if weights is not None:

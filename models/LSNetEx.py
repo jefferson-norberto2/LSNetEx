@@ -36,26 +36,17 @@ class LSNetEx(Module):
             self._load_v2()
         else:
             raise Exception('Invalid option network.')
-
+        
     def _load_large(self):
         self.rgb_pretrained = mobilenet_v3_large_ex(pretrained=True)
         self.depth_pretrained = mobilenet_v3_large_ex(pretrained=True)
-
+        
         # Upsample_model
-        self.upsample1_g = Sequential(Conv2d(108, 54, 3, 1, 1, ), BatchNorm2d(54), GELU(),
-                                         UpsamplingBilinear2d(scale_factor=2, ))
-
-        self.upsample2_g = Sequential(Conv2d(184, 92, 3, 1, 1, ), BatchNorm2d(92), GELU(),
-                                         UpsamplingBilinear2d(scale_factor=2, ))
-
-        self.upsample3_g = Sequential(Conv2d(320, 160, 3, 1, 1, ), BatchNorm2d(160), GELU(),
-                                         UpsamplingBilinear2d(scale_factor=2, ))
-
-        self.upsample4_g = Sequential(Conv2d(560, 280, 3, 1, 1, ), BatchNorm2d(280), GELU(),
-                                         UpsamplingBilinear2d(scale_factor=2, ))
-
-        self.upsample5_g = Sequential(Conv2d(960, 480, 3, 1, 1, ), BatchNorm2d(480), GELU(),
-                                         UpsamplingBilinear2d(scale_factor=2, ))
+        self.upsample1_g = self.__sequential((108, 54, 3, 1, 1, ), 54)
+        self.upsample2_g = self.__sequential((184, 92, 3, 1, 1, ), 92)
+        self.upsample3_g = self.__sequential((320, 160, 3, 1, 1, ), 160)
+        self.upsample4_g = self.__sequential((560, 280, 3, 1, 1, ), 280)
+        self.upsample5_g = self.__sequential((960, 480, 3, 1, 1, ), 480)
         
         self.conv_g = Conv2d(54, 1, 1)
         self.conv2_g = Conv2d(92, 1, 1)
@@ -76,20 +67,11 @@ class LSNetEx(Module):
         self.depth_pretrained = mobilenet_v3_small_ex()
 
         # Upsample_model
-        self.upsample1_g = Sequential(Conv2d(55, 27, 3, 1, 1, ), BatchNorm2d(27), GELU(),
-                                         UpsamplingBilinear2d(scale_factor=2, ))
-
-        self.upsample2_g = Sequential(Conv2d(78, 39, 3, 1, 1, ), BatchNorm2d(39), GELU(),
-                                         UpsamplingBilinear2d(scale_factor=2, ))
-
-        self.upsample3_g = Sequential(Conv2d(124, 62, 3, 1, 1, ), BatchNorm2d(62), GELU(),
-                                         UpsamplingBilinear2d(scale_factor=2, ))
-
-        self.upsample4_g = Sequential(Conv2d(200, 100, 3, 1, 1, ), BatchNorm2d(100), GELU(),
-                                         UpsamplingBilinear2d(scale_factor=2, ))
-
-        self.upsample5_g = Sequential(Conv2d(576, 160, 3, 1, 1, ), BatchNorm2d(160), GELU(),
-                                         UpsamplingBilinear2d(scale_factor=2, ))
+        self.upsample1_g = self.__sequential((55, 27, 3, 1, 1, ), 27)
+        self.upsample2_g = self.__sequential((78, 39, 3, 1, 1, ), 39)
+        self.upsample3_g = self.__sequential((124, 62, 3, 1, 1, ), 62)
+        self.upsample4_g = self.__sequential((200, 100, 3, 1, 1, ), 100)
+        self.upsample5_g = self.__sequential((576, 160, 3, 1, 1, ), 160)
         
         self.conv_g = Conv2d(27, 1, 1)
         self.conv2_g = Conv2d(39, 1, 1)
@@ -109,26 +91,20 @@ class LSNetEx(Module):
         self.rgb_pretrained = mobilenet_v2()
         self.depth_pretrained = mobilenet_v2()
 
-        # Upsample_model
-        self.upsample1_g = Sequential(Conv2d(68, 34, 3, 1, 1, ), BatchNorm2d(34), GELU(),
-                                         UpsamplingBilinear2d(scale_factor=2, ))
-
-        self.upsample2_g = Sequential(Conv2d(104, 52, 3, 1, 1, ), BatchNorm2d(52), GELU(),
-                                         UpsamplingBilinear2d(scale_factor=2, ))
-
-        self.upsample3_g = Sequential(Conv2d(160, 80, 3, 1, 1, ), BatchNorm2d(80), GELU(),
-                                         UpsamplingBilinear2d(scale_factor=2, ))
-
-        self.upsample4_g = Sequential(Conv2d(256, 128, 3, 1, 1, ), BatchNorm2d(128), GELU(),
-                                         UpsamplingBilinear2d(scale_factor=2, ))
-
-        self.upsample5_g = Sequential(Conv2d(320, 160, 3, 1, 1, ), BatchNorm2d(160), GELU(),
-                                         UpsamplingBilinear2d(scale_factor=2, ))
+        bn1 = 34
+        bn2 = 52
+        bn3 = 80
+        
+        self.upsample1_g = self.__sequential((68, 34, 3, 1, 1, ), bn1)
+        self.upsample2_g = self.__sequential((104, 52, 3, 1, 1, ), bn2)
+        self.upsample3_g = self.__sequential((160, 80, 3, 1, 1, ), bn3)
+        self.upsample4_g = self.__sequential((256, 128, 3, 1, 1, ), 128)
+        self.upsample5_g = self.__sequential((320, 160, 3, 1, 1, ), 160)
 
 
-        self.conv_g = Conv2d(34, 1, 1)
-        self.conv2_g = Conv2d(52, 1, 1)
-        self.conv3_g = Conv2d(80, 1, 1)
+        self.conv_g = Conv2d(bn1, 1, 1)
+        self.conv2_g = Conv2d(bn2, 1, 1)
+        self.conv3_g = Conv2d(bn3, 1, 1)
 
 
         # Tips: speed test and params and more this part is not included.
@@ -153,13 +129,13 @@ class LSNetEx(Module):
             Tuple[Tensor, Tensor, Tensor, Tensor]: Output tensors from the model and additional losses (if in training mode).
 
         """
-        # if self.is_large:
-        #     out = self.forward_large(rgb, ti)
-        # else:
-        out = self.forward_small(rgb, ti)
+        if self.network == 3:
+            out = self._forward_2d(rgb, ti)
+        else:
+            out = self._forward_imp(rgb, ti)
         return out
     
-    def forward_large(self, rgb, ti):
+    def _forward_2d(self, rgb, ti):
         A1, A2, A3, A4, A5, A6, A7 = self.rgb_pretrained(rgb)
         A1_t, A2_t, A3_t, A4_t, A5_t, A6_t, A7_t = self.depth_pretrained(ti)
 
@@ -216,7 +192,7 @@ class LSNetEx(Module):
         
         return out
 
-    def forward_small(self, rgb, ti):
+    def _forward_imp(self, rgb, ti):
         # rgb
         A1, A2, A3, A4, A5 = self.rgb_pretrained(rgb)
         # ti
@@ -266,3 +242,11 @@ class LSNetEx(Module):
             return out, out2, out3, loss_KD
         
         return out
+
+    def __sequential(self, conv2d: tuple, batch_norm: int, scale = 2) -> Sequential:
+        return Sequential(
+            Conv2d(conv2d[0], conv2d[1], conv2d[2], conv2d[3], conv2d[4], ), 
+            BatchNorm2d(batch_norm), 
+            GELU(),
+            UpsamplingBilinear2d(scale_factor=scale, )
+        )

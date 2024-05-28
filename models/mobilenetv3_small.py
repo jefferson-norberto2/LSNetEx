@@ -1,10 +1,5 @@
-from typing import Any, Callable, List
 from torch import Tensor
-from torch.nn.modules import Module
-from torchvision.models.mobilenetv3 import _mobilenet_v3_conf, MobileNetV3, MobileNet_V3_Small_Weights, InvertedResidualConfig
-from torch.nn.functional import interpolate
-from typing import Optional
-from torchvision.models._utils import _ovewrite_named_param
+from torchvision.models.mobilenetv3 import _mobilenet_v3_conf, MobileNetV3, MobileNet_V3_Small_Weights
 
 class MobileNetV3Small(MobileNetV3):
     """
@@ -20,7 +15,15 @@ class MobileNetV3Small(MobileNetV3):
         **kwargs (Any): Additional keyword arguments for model initialization.
 
     """
-    def __init__(self, inverted_residual_setting: List[InvertedResidualConfig], last_channel: int, num_classes: int = 1000, block: Callable[..., Module] | None = None, norm_layer: Callable[..., Module] | None = None, dropout: float = 0.2, **kwargs: Any) -> None:
+    def __init__(self, 
+                 inverted_residual_setting, 
+                 last_channel: int, 
+                 num_classes = 1000, 
+                 block = None, 
+                 norm_layer = None, 
+                 dropout = 0.2, 
+                 **kwargs,
+                ) -> None:
         super().__init__(inverted_residual_setting, last_channel, num_classes, block, norm_layer, dropout, **kwargs)
     
     def _forward_impl(self, x: Tensor) -> Tensor:
@@ -35,7 +38,7 @@ class MobileNetV3Small(MobileNetV3):
 
         """
 
-        x = self.features[:1](x)
+        x = self.features[0:1](x)
         out1 = x
         x = self.features[1:2](x)
         out2 = x
@@ -43,14 +46,16 @@ class MobileNetV3Small(MobileNetV3):
         out3 = x
         x = self.features[4:6](x)
         out4 = x
-        x = self.features[6:14](x)
+        x = self.features[6:13](x)
         out5 = x
-
+        
         return out1, out2, out3, out4, out5
 
 def mobilenet_v3_small_ex(
-    *, weights: Optional[MobileNet_V3_Small_Weights] = MobileNet_V3_Small_Weights.IMAGENET1K_V1, progress: bool = True, **kwargs: Any
-) -> MobileNetV3Small:
+    weights = MobileNet_V3_Small_Weights.IMAGENET1K_V1, 
+    progress: bool = True, 
+    **kwargs
+    ) -> MobileNetV3Small:
     """
     Constructs a MobileNetV3 small model with extended functionality.
 
@@ -63,14 +68,10 @@ def mobilenet_v3_small_ex(
         MobileNetV3Ex: An instance of MobileNetV3Ex model.
 
     """
-    weights = MobileNet_V3_Small_Weights.verify(weights)
+    # Recovery arch from pytorch implementation
+    arch, last_channel = _mobilenet_v3_conf("mobilenet_v3_small", **kwargs)
 
-    inverted_residual_setting, last_channel = _mobilenet_v3_conf("mobilenet_v3_small", **kwargs)
-    
-    if weights is not None:
-        _ovewrite_named_param(kwargs, "num_classes", len(weights.meta["categories"]))
-
-    model = MobileNetV3Small(inverted_residual_setting, last_channel, **kwargs)
+    model = MobileNetV3Small(arch, last_channel, **kwargs)
 
     if weights is not None:
         model.load_state_dict(weights.get_state_dict(progress=progress))

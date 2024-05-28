@@ -1,5 +1,6 @@
 
-train 20 epochs, batch 10, RGBT, rate 0.0001 <- Usando os dados do artigo
+train 20 epochs, batch 10, RGBT, rate 0.0001 <- Usando os valores do artigo
+Testes feitos no notebook e em uma Raspberry pi 4b 4gb
 
 Test:           
                 VT0821,		VT1000, 	VT2500 
