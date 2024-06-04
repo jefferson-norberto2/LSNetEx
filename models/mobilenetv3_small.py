@@ -24,7 +24,13 @@ class MobileNetV3Small(MobileNetV3):
                  dropout = 0.2, 
                  **kwargs,
                 ) -> None:
-        super().__init__(inverted_residual_setting, last_channel, num_classes, block, norm_layer, dropout, **kwargs)
+        super().__init__(inverted_residual_setting, 
+                         last_channel,
+                         num_classes, 
+                         block, 
+                         norm_layer, 
+                         dropout, 
+                         **kwargs)
         self.classifier = None
     
     def _forward_impl(self, x: Tensor) -> Tensor:
@@ -52,7 +58,7 @@ class MobileNetV3Small(MobileNetV3):
         
         return out1, out2, out3, out4, out5
 
-def mobilenet_v3_small_ex(
+def mobilenet_v3_small(
     weights = MobileNet_V3_Small_Weights.IMAGENET1K_V1, 
     progress: bool = True, 
     **kwargs
@@ -82,7 +88,7 @@ def mobilenet_v3_small_ex(
 
 if __name__ == '__main__':
     import torch
-    model = mobilenet_v3_small_ex(pretrained=True)
+    model = mobilenet_v3_small(pretrained=True)
     rgb = torch.randn(1, 3, 224, 224)
     out = model(rgb)
     for i in out:
