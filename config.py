@@ -6,7 +6,6 @@ task = 'RGBT'
 # train/val
 parser.add_argument('--task', type=str, default=task, help='type task (RGBT or RGBD)')
 parser.add_argument('--epoch', type=int, default=20, help='epoch number')
-parser.add_argument('--network', type=int, default=1, help='Choose network structure: 0 -> V3 Large, 1 -> V3 Small, 2 -> V2 Pytorch')
 parser.add_argument('--lr', type=float, default=0.0001, help='learning rate')
 parser.add_argument('--batchsize', type=int, default=10, help='training batch size')
 parser.add_argument('--trainsize', type=int, default=224, help='training dataset size')

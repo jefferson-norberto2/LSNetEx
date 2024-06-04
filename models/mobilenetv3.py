@@ -1,7 +1,7 @@
 from torch import Tensor
-from torchvision.models.mobilenetv3 import _mobilenet_v3_conf, MobileNetV3, MobileNet_V3_Small_Weights
+from torchvision.models.mobilenetv3 import _mobilenet_v3_conf, MobileNetV3, MobileNet_V3_Large_Weights
 
-class MobileNetV3Small(MobileNetV3):
+class MobileNetV3Large(MobileNetV3):
     """
     Extended version of MobileNetV3 model.
 
@@ -15,16 +15,18 @@ class MobileNetV3Small(MobileNetV3):
         **kwargs (Any): Additional keyword arguments for model initialization.
 
     """
-    def __init__(self, 
-                 inverted_residual_setting, 
-                 last_channel: int, 
-                 num_classes = 1000, 
+    def __init__(self, inverted_residual_setting, 
+                 last_channel: int, num_classes = 1000, 
                  block = None, 
                  norm_layer = None, 
                  dropout = 0.2, 
-                 **kwargs,
-                ) -> None:
-        super().__init__(inverted_residual_setting, last_channel, num_classes, block, norm_layer, dropout, **kwargs)
+                 **kwargs) -> None:
+        super().__init__(inverted_residual_setting, 
+                         last_channel, 
+                         num_classes, 
+                         block, norm_layer, 
+                         dropout, 
+                         **kwargs)
         self.classifier = None
     
     def _forward_impl(self, x: Tensor) -> Tensor:
@@ -38,51 +40,49 @@ class MobileNetV3Small(MobileNetV3):
             Tensor: Output tensors from various intermediate layers.
 
         """
-
-        x = self.features[0:1](x)
+        x = self.features[:2](x)
         out1 = x
-        x = self.features[1:2](x)
-        out2 = x
         x = self.features[2:4](x)
+        out2 = x
+        x = self.features[4:7](x)
         out3 = x
-        x = self.features[4:6](x)
+        x = self.features[7:10](x)
         out4 = x
-        x = self.features[6:13](x)
+        x = self.features[10:](x)
         out5 = x
-        
+
         return out1, out2, out3, out4, out5
 
-def mobilenet_v3_small_ex(
-    weights = MobileNet_V3_Small_Weights.IMAGENET1K_V1, 
+def mobilenet_v3_large_ex(
+    weights = MobileNet_V3_Large_Weights.IMAGENET1K_V2, 
     progress: bool = True, 
-    **kwargs
-    ) -> MobileNetV3Small:
+    **kwargs,
+    ) -> MobileNetV3Large:
     """
-    Constructs a MobileNetV3 small model with extended functionality.
+    Constructs a MobileNetV3 large model with extended functionality.
 
     Args:
-        weights (Optional[MobileNet_V3_Small_Weights], optional): Pre-trained weights. Defaults to None.
+        weights (Optional[MobileNet_V3_Large_Weights], optional): Pre-trained weights. Defaults to None.
         progress (bool, optional): If True, displays a progress bar of the download. Defaults to True.
         **kwargs (Any): Additional keyword arguments for model initialization.
 
     Returns:
-        MobileNetV3Ex: An instance of MobileNetV3Ex model.
+        MobileNetV3: An instance of MobileNetV3 model.
 
     """
-    # Recovery arch from pytorch implementation
-    arch, last_channel = _mobilenet_v3_conf("mobilenet_v3_small", **kwargs)
 
-    model = MobileNetV3Small(arch, last_channel, **kwargs)
+    arch, last_channel = _mobilenet_v3_conf("mobilenet_v3_large", **kwargs)
+    
+    model = MobileNetV3Large(arch, last_channel, **kwargs)
 
     if weights is not None:
         model.load_state_dict(weights.get_state_dict(progress=progress))
 
-    return model
-    
+    return model    
 
 if __name__ == '__main__':
     import torch
-    model = mobilenet_v3_small_ex(pretrained=True)
+    model = mobilenet_v3_large_ex(pretrained=True)
     rgb = torch.randn(1, 3, 224, 224)
     out = model(rgb)
     for i in out:
