@@ -2,7 +2,7 @@ from torch import cat
 from torch.nn import Module, Sequential, Conv2d, UpsamplingBilinear2d, GELU, BatchNorm2d
 from models.afd_semantic import AFD_semantic
 from models.afd_spatial import AFD_spatial
-from models.mobilenetv3_small import mobilenet_v3_small
+from models.mobilenetv3 import mobilenet_v3_small
 
 class LSNetEx(Module):
     """
