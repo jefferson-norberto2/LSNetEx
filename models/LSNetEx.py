@@ -41,9 +41,11 @@ class LSNetEx(Module):
         self.upsample5_g = Sequential(Conv2d(432, 216, 3, 1, 1, ), BatchNorm2d(216), GELU(),
                                          UpsamplingBilinear2d(scale_factor=1, ))
         
-        self.upsample6_g = Sequential(Conv2d(640, 320, 3, 1, 1, ), BatchNorm2d(320), GELU(),  UpsamplingBilinear2d(scale_factor=2, ))
+        self.upsample6_g = Sequential(Conv2d(640, 320, 3, 1, 1, ), BatchNorm2d(320), GELU(),  
+                                         UpsamplingBilinear2d(scale_factor=2, ))
         
-        self.upsample7_g = Sequential(Conv2d(960, 480, 3, 1, 1, ), BatchNorm2d(480), GELU())
+        self.upsample7_g = Sequential(Conv2d(960, 480, 3, 1, 1, ), BatchNorm2d(480), GELU(),
+                                         UpsamplingBilinear2d(scale_factor=1, ))
         
         self.conv_g = Conv2d(38, 1, 1)
         self.conv2_g = Conv2d(60, 1, 1)
