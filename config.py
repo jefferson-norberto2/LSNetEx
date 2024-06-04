@@ -22,5 +22,5 @@ parser.add_argument('--save_path', type=str, default='Runs/v3_large_2/', help='t
 parser.add_argument('--testsize', type=int, default=224, help='testing size')
 parser.add_argument('--test_path',type=str,default=f'{task}_dataset/test/',help='test dataset path')
 parser.add_argument('--test_save_path', type=str, default='Test/', help='path to save run test')
-parser.add_argument('--model_path', type=str, default='Runs/v3_small/Net_epoch_best.pth', help='path to model')
+parser.add_argument('--model_path', type=str, default='Runs/v3_large/Net_epoch_best.pth', help='path to model')
 opt = parser.parse_args()
