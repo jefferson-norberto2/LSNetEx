@@ -14,7 +14,7 @@ my_device = device("cuda" if is_available() else "cpu")
 print('Device in use:', my_device)
 
 # Carrega o modelo
-model = LSNetEx(network=opt.network).to(my_device)
+model = LSNetEx().to(my_device)
 model.load_state_dict(load(model_path, map_location=my_device))
 model.eval()
 
