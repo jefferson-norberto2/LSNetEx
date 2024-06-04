@@ -1,8 +1,5 @@
 from torch import device, load, cat, no_grad, sigmoid, sum, abs, numel
 from torch.cuda import is_available
-# from os import makedirs
-# from os.path import exists
-# from cv2 import imwrite
 from tqdm import tqdm
 
 from dataloader.dataset import test_dataset_depth, test_dataset_thermal
@@ -36,8 +33,6 @@ for dataset in test_datasets:
     save_path = dataset + '/'
     print(f'Dataset: {save_path}')
 
-    # if not exists(save_path):
-    #     makedirs(save_path)
     if opt.task == 'RGBT':
         image_root = dataset_path + dataset + '/RGB/'
         gt_root = dataset_path + dataset + '/GT/'
@@ -68,8 +63,6 @@ for dataset in test_datasets:
             mae = sum(abs(predict - gt)) / numel(gt)
             mae_sum = mae.item() + mae_sum
             predict = predict.cpu().numpy().squeeze()
-            # print('Saving image to:', save_path + name)
-            # imwrite(save_path + name, predict * 255)
 
     test_mae.append(mae_sum / test_loader.size)
 

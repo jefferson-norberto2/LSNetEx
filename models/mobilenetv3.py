@@ -3,7 +3,6 @@ from torch import Tensor
 from torch.nn.modules import Module
 from torchvision.models.mobilenetv3 import _mobilenet_v3_conf, MobileNetV3, MobileNet_V3_Large_Weights, InvertedResidualConfig
 from typing import Optional
-from torchvision.models._utils import _ovewrite_named_param
 
 class MobileNetV3Large(MobileNetV3):
     """
@@ -19,8 +18,20 @@ class MobileNetV3Large(MobileNetV3):
         **kwargs (Any): Additional keyword arguments for model initialization.
 
     """
-    def __init__(self, inverted_residual_setting: List[InvertedResidualConfig], last_channel: int, num_classes: int = 1000, block: Callable[..., Module] | None = None, norm_layer: Callable[..., Module] | None = None, dropout: float = 0.2, **kwargs: Any) -> None:
-        super().__init__(inverted_residual_setting, last_channel, num_classes, block, norm_layer, dropout, **kwargs)
+    def __init__(self, inverted_residual_setting: List[InvertedResidualConfig], 
+                 last_channel: int, 
+                 num_classes: int = 1000, 
+                 block: Callable[..., Module] | None = None, 
+                 norm_layer: Callable[..., Module] | None = None, 
+                 dropout: float = 0.2, 
+                 **kwargs: Any) -> None:
+        super().__init__(inverted_residual_setting, 
+                         last_channel, 
+                         num_classes, 
+                         block, 
+                         norm_layer, 
+                         dropout, 
+                         **kwargs)
         self.classifier = None
     
     def _forward_impl(self, x: Tensor) -> Tensor:
@@ -42,17 +53,17 @@ class MobileNetV3Large(MobileNetV3):
         out3 = x
         x = self.features[7:10](x)
         out4 = x
-        x = self.features[10:14](x)
+        x = self.features[10:13](x)
         out5 = x
-        x = self.features[14:18](x)
+        x = self.features[13:16](x)
         out6 = x
-        x = self.features[18:20](x)
+        x = self.features[16:](x)
         out7 = x
         
 
         return out1, out2, out3, out4, out5, out6, out7
 
-def mobilenet_v3_large_ex(
+def mobilenet_v3_large(
     *, weights: Optional[MobileNet_V3_Large_Weights] = MobileNet_V3_Large_Weights.IMAGENET1K_V2, 
     progress: bool = True, 
     **kwargs: Any,
@@ -69,12 +80,7 @@ def mobilenet_v3_large_ex(
         MobileNetV3: An instance of MobileNetV3 model.
 
     """
-    weights = MobileNet_V3_Large_Weights.verify(weights)
-
     inverted_residual_setting, last_channel = _mobilenet_v3_conf("mobilenet_v3_large", **kwargs)
-    
-    if weights is not None:
-        _ovewrite_named_param(kwargs, "num_classes", len(weights.meta["categories"]))
     
     model = MobileNetV3Large(inverted_residual_setting, last_channel, **kwargs)
 
@@ -85,7 +91,7 @@ def mobilenet_v3_large_ex(
 
 if __name__ == '__main__':
     import torch
-    model = mobilenet_v3_large_ex(pretrained=True)
+    model = mobilenet_v3_large(pretrained=True)
     rgb = torch.randn(1, 3, 224, 224)
     out = model(rgb)
     for i in out:
