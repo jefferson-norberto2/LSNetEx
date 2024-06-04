@@ -38,6 +38,7 @@ class MobileNetV2Ex(MobileNetV2):
         norm_layer,
         dropout,
         )
+        self.classifier = None
     
     def _forward_impl(self, x: Tensor) -> Tensor:
         """

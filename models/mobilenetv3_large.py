@@ -17,6 +17,7 @@ class MobileNetV3Large(MobileNetV3):
     """
     def __init__(self, inverted_residual_setting, last_channel: int, num_classes = 1000, block = None, norm_layer = None, dropout = 0.2, **kwargs) -> None:
         super().__init__(inverted_residual_setting, last_channel, num_classes, block, norm_layer, dropout, **kwargs)
+        self.classifier = None
     
     def _forward_impl(self, x: Tensor) -> Tensor:
         """

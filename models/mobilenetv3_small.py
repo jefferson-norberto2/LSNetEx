@@ -25,6 +25,7 @@ class MobileNetV3Small(MobileNetV3):
                  **kwargs,
                 ) -> None:
         super().__init__(inverted_residual_setting, last_channel, num_classes, block, norm_layer, dropout, **kwargs)
+        self.classifier = None
     
     def _forward_impl(self, x: Tensor) -> Tensor:
         """
