@@ -4,6 +4,7 @@ __pycache__/*
 RGBT_dataset/*
 RGBD_dataset/*
 Test/*
+Runs2/
 
 *.zip
 *.pyc
