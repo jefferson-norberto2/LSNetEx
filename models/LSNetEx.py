@@ -3,7 +3,7 @@ from torch.nn import Module, Sequential, Conv2d, UpsamplingBilinear2d, GELU, Bat
 from models.afd_semantic import AFD_semantic
 from models.afd_spatial import AFD_spatial
 from models.mobilenetv3_large import mobilenet_v3_large_ex
-from models.mobilenetv3_small import mobilenet_v3_small_ex
+from models.mobilenetv3_small import MobileNetV3Small
 from models.mobilenetv2 import MobileNetV2Ex
 
 class LSNetEx(Module):
@@ -63,8 +63,8 @@ class LSNetEx(Module):
             self.AFD_spatial_1_R_T = AFD_spatial(16)
 
     def _load_small(self):
-        self.rgb_pretrained = mobilenet_v3_small_ex()
-        self.depth_pretrained = mobilenet_v3_small_ex()
+        self.rgb_pretrained = MobileNetV3Small()
+        self.depth_pretrained = MobileNetV3Small()
 
         # Upsample_model
         self.upsample1_g = self.__sequential((55, 27, 3, 1, 1, ), 27)

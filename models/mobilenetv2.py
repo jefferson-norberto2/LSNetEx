@@ -9,8 +9,8 @@ class MobileNetV2Ex(Module):
     """
     def __init__(self, pretrained=True) -> None:
         super(MobileNetV2Ex, self).__init__()
-        weigths = MobileNet_V2_Weights.IMAGENET1K_V1 if pretrained else None
-        _model = mobilenet_v2(weights=weigths)
+        _weigths = MobileNet_V2_Weights.IMAGENET1K_V1 if pretrained else None
+        _model = mobilenet_v2(weights=_weigths)
         self.features = _model.features
     
     def forward(self, x: Tensor) -> Tensor:
