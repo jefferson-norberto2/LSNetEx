@@ -1,7 +1,7 @@
 from os import makedirs, environ
 from os.path import exists
 
-from torch import load, cat, sigmoid, tensor, save, no_grad, sum, abs, numel, as_tensor, cuda, device
+from torch import load, cat, sigmoid, tensor, save, no_grad, sum, abs, numel, as_tensor, cuda, device, amp
 from torch.optim import Adam
 from torch.nn.functional import interpolate
 from torch.nn import BCEWithLogitsLoss
@@ -16,7 +16,6 @@ from tensorboardX import SummaryWriter
 from logging import basicConfig, info, INFO
 from torch.backends import cudnn
 from config import opt
-from torch.cuda import amp
 
 from models.LSNetEx import LSNetEx
 from dataloader.dataset import get_loader
@@ -96,8 +95,7 @@ step = 0
 writer = SummaryWriter(save_path + 'summary', flush_secs=30)
 best_mae = 1
 best_epoch = 0
-Sacler = amp.GradScaler()
-
+Sacler = amp.GradScaler('cuda' if cuda.is_available() else 'cpu')
 
 # train function
 def train(train_loader, model, optimizer, epoch, save_path, device):

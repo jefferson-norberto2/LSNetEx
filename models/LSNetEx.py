@@ -2,9 +2,7 @@ from torch import cat
 from torch.nn import Module, Sequential, Conv2d, UpsamplingBilinear2d, GELU, BatchNorm2d
 from models.afd_semantic import AFD_semantic
 from models.afd_spatial import AFD_spatial
-from models.mobilenetv3_large import mobilenet_v3_large_ex
-from models.mobilenetv3_small import MobileNetV3Small
-from models.mobilenetv2 import MobileNetV2Ex
+from models import MobileNetV2Ex, MobileNetV3Large, MobileNetV3Small
 
 class LSNetEx(Module):
     """
@@ -38,8 +36,8 @@ class LSNetEx(Module):
             raise Exception('Invalid option network.')
         
     def _load_large(self):
-        self.rgb_pretrained = mobilenet_v3_large_ex(pretrained=True)
-        self.depth_pretrained = mobilenet_v3_large_ex(pretrained=True)
+        self.rgb_pretrained = MobileNetV3Large(pretrained=True)
+        self.depth_pretrained = MobileNetV3Large(pretrained=True)
         
         # Upsample_model
         self.upsample1_g = self.__sequential((108, 54, 3, 1, 1, ), 54)
