@@ -4,7 +4,7 @@ from models.afd_semantic import AFD_semantic
 from models.afd_spatial import AFD_spatial
 from models.mobilenetv3_large import mobilenet_v3_large_ex
 from models.mobilenetv3_small import mobilenet_v3_small_ex
-from models.mobilenetv2 import mobilenet_v2
+from models.mobilenetv2 import MobileNetV2Ex
 
 class LSNetEx(Module):
     """
@@ -88,8 +88,8 @@ class LSNetEx(Module):
             self.AFD_spatial_1_R_T = AFD_spatial(16)
 
     def _load_v2(self):
-        self.rgb_pretrained = mobilenet_v2()
-        self.depth_pretrained = mobilenet_v2()
+        self.rgb_pretrained = MobileNetV2Ex()
+        self.depth_pretrained = MobileNetV2Ex()
 
         bn1 = 34
         bn2 = 52

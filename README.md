@@ -9,6 +9,36 @@ If anything goes wrong with the environment, please check requirements.txt for d
    ![image](https://user-images.githubusercontent.com/38373305/218299592-13bb523b-8f1d-485f-9c65-137dca4e1544.png)
 <img src="https://user-images.githubusercontent.com/38373305/218299628-8b7bbdc5-39b2-4d68-9cdb-828e617c0bab.png" alt="drawing" width="400" height="400"/> <img src="https://user-images.githubusercontent.com/38373305/218299686-8a7e7cae-8970-4e56-a4b1-4986b872741f.png" alt="drawing" width="400" height="400"/>
 
+# MobilenetV2 architecture
+## Camadas Depthwise Separable Convolution:
+
+    A MobileNetV2 utiliza convoluções separáveis (depthwise separable convolutions), que dividem a operação convolucional em duas partes:
+        1. Depthwise Convolution: Aplica uma única convolução 3x3 em cada canal de entrada separadamente.
+        2. Pointwise Convolution: Usa uma convolução 1x1 para combinar os canais de entrada, reduzindo o número de operações e parâmetros.
+
+## Inverted Residual Blocks:
+
+    Ao contrário dos blocos residuais comuns (ResNets), a MobileNetV2 introduz blocos residuais invertidos, onde:
+        - O número de canais é expandido (com convolução 1x1) antes de aplicar a convolução depthwise e depois reduzido de volta.
+        - Isso ajuda a capturar mais informação relevante, melhorando a eficiência.
+
+## Linear Bottlenecks:
+
+    Após cada bloco invertido, uma camada linear com menor dimensionalidade é utilizada. Isso evita a perda de informação e melhora a compactação da rede.
+
+## Stride e Downsampling:
+
+    A MobileNetV2 utiliza strides de 2 em algumas camadas para reduzir a resolução espacial, permitindo uma redução progressiva do tamanho da entrada.
+
+## Estrutura Geral:
+
+    A arquitetura começa com uma camada convolucional regular, seguida por vários blocos de inverted residuals.
+    O modelo termina com uma convolução final e um classificador totalmente conectado para tarefas de classificação.
+
+## Eficiência Computacional:
+
+    Graças à combinação de depthwise separable convolutions e inverted residuals, a MobileNetV2 reduz significativamente a quantidade de operações (FLOPs) e o número de parâmetros, tornando-se extremamente eficiente para dispositivos móveis.
+
 # Results
 <img src="https://user-images.githubusercontent.com/38373305/218301004-4556a1c6-b76b-44b6-aeab-1f48b15cc17d.png" alt="drawing"/>
 <img src="https://user-images.githubusercontent.com/38373305/218301024-cbf9bfbc-b3e2-4e44-89a2-106fafeda465.png" alt="drawing"/>
