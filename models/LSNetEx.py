@@ -43,11 +43,13 @@ class LSNetEx(Module):
         self.depth_pretrained = MobileNetV3Large(pretrained=True)
         
         # Upsample_model
-        self.upsample1_g = self.__sequential((108, 54, 3, 1, 1, ), 54)
-        self.upsample2_g = self.__sequential((184, 92, 3, 1, 1, ), 92)
-        self.upsample3_g = self.__sequential((320, 160, 3, 1, 1, ), 160)
-        self.upsample4_g = self.__sequential((560, 280, 3, 1, 1, ), 280)
-        self.upsample5_g = self.__sequential((960, 480, 3, 1, 1, ), 480)
+        self.upsample1_g = self.__sequential((76, 38, 3, 1, 1, ), 38)
+        self.upsample2_g = self.__sequential((118, 60, 3, 1, 1, ), 60)
+        self.upsample3_g = self.__sequential((188, 94, 3, 1, 1, ), 94)
+        self.upsample4_g = self.__sequential((296, 148, 3, 1, 1, ), 148)
+        self.upsample5_g = self.__sequential((432, 216, 3, 1, 1, ), 216)
+        self.upsample6_g = self.__sequential((640, 320, 3, 1, 1, ), 320)
+        self.upsample7_g = self.__sequential((960, 480, 3, 1, 1, ), 480)
         
         self.conv_g = Conv2d(54, 1, 1)
         self.conv2_g = Conv2d(92, 1, 1)
