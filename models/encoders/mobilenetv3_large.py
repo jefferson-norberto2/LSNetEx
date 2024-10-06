@@ -37,10 +37,15 @@ class MobileNetV3Large(Module):
         out3 = x
         x = self.features[7:10](x)
         out4 = x
-        x = self.features[10:](x)
+        x = self.features[10:13](x)
         out5 = x
+        x = self.features[13:16](x)
+        out6 = x
+        x = self.features[16:](x)
+        out7 = x
+        
 
-        return out1, out2, out3, out4, out5
+        return out1, out2, out3, out4, out5, out6, out7
 
 if __name__ == '__main__':
     import torch
