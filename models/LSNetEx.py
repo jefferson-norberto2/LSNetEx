@@ -1,8 +1,8 @@
 from torch import cat
 from torch.nn import Module, Sequential, Conv2d, UpsamplingBilinear2d, GELU, BatchNorm2d
-from models.afd_semantic import AFD_semantic
-from models.afd_spatial import AFD_spatial
-from models import MobileNetV2Ex, MobileNetV3Large, MobileNetV3Small
+from models.utils.afd_semantic import AFD_semantic
+from models.utils.afd_spatial import AFD_spatial
+from models import MobileNetV2Pytorch, MobileNetV3Large, MobileNetV3Small, mobilenet_v2
 
 class LSNetEx(Module):
     """
@@ -24,14 +24,17 @@ class LSNetEx(Module):
         self.network = network
 
         if self.network == 0:
-            print('LsNet - V3Large')
-            self._load_large()
+            print('LSNet - V2 Article')
+            self._load_v2(network)
         elif self.network == 1:
-            print('LsNet - V3Small')
-            self._load_small()
+            print('LSNet - V2 Pytorch')
+            self._load_v2(network)
         elif self.network == 2:
-            print('LsNet - V2')
-            self._load_v2()
+            print('LSNet - V3 Small')
+            self._load_small()
+        elif self.network == 3:
+            print('LSNet - V3 Large')
+            self._load_large()
         else:
             raise Exception('Invalid option network.')
         
@@ -85,9 +88,13 @@ class LSNetEx(Module):
             self.AFD_spatial_2_R_T = AFD_spatial(16)
             self.AFD_spatial_1_R_T = AFD_spatial(16)
 
-    def _load_v2(self):
-        self.rgb_pretrained = MobileNetV2Ex()
-        self.depth_pretrained = MobileNetV2Ex()
+    def _load_v2(self, network=0):
+        if network == 0:
+            self.rgb_pretrained = mobilenet_v2()
+            self.depth_pretrained = mobilenet_v2()
+        else:
+            self.rgb_pretrained = MobileNetV2Pytorch()
+            self.depth_pretrained = MobileNetV2Pytorch()
 
         bn1 = 34
         bn2 = 52

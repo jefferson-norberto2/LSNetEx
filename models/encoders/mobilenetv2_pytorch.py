@@ -2,13 +2,13 @@ from torch import Tensor
 from torch.nn import Module
 from torchvision.models.mobilenetv2 import mobilenet_v2, MobileNet_V2_Weights
 
-class MobileNetV2Ex(Module):
+class MobileNetV2Pytorch(Module):
     """
     Extended version of MobileNetV2 model from Pytorch.
 
     """
     def __init__(self, pretrained=True) -> None:
-        super(MobileNetV2Ex, self).__init__()
+        super(MobileNetV2Pytorch, self).__init__()
         _weigths = MobileNet_V2_Weights.IMAGENET1K_V1 if pretrained else None
         _model = mobilenet_v2(weights=_weigths)
         self.features = _model.features
@@ -43,7 +43,7 @@ class MobileNetV2Ex(Module):
 
 if __name__ == '__main__':
     import torch
-    model = MobileNetV2Ex()
+    model = MobileNetV2Pytorch()
     rgb = torch.randn(1, 3, 224, 224)
     out = model(rgb)
     for i in out:

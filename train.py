@@ -8,8 +8,8 @@ from torch.nn import BCEWithLogitsLoss
 
 from datetime import datetime
 from torchvision.utils import make_grid
-from models.IOUBCE_without_logits_loss import IOUBCEWithoutLogits_loss
-from models.IOUBCE_loss import IOUBCE_loss
+from models.utils.IOUBCE_without_logits_loss import IOUBCEWithoutLogits_loss
+from models.utils.IOUBCE_loss import IOUBCE_loss
 from utils import adjust_lr, tesnor_bound
 
 from tensorboardX import SummaryWriter
