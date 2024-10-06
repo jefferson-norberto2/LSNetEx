@@ -51,16 +51,18 @@ class LSNetEx(Module):
         self.upsample6_g = self.__sequential((640, 320, 3, 1, 1, ), 320)
         self.upsample7_g = self.__sequential((960, 480, 3, 1, 1, ), 480)
         
-        self.conv_g = Conv2d(54, 1, 1)
-        self.conv2_g = Conv2d(92, 1, 1)
-        self.conv3_g = Conv2d(160, 1, 1)
+        self.conv_g = Conv2d(38, 1, 1)
+        self.conv2_g = Conv2d(60, 1, 1)
+        self.conv3_g = Conv2d(94, 1, 1)
 
         # Tips: speed test and params and more this part is not included.
         # please comment this part when involved.
         if self.training:
-            self.AFD_semantic_5_R_T = AFD_semantic(960, 0.0625)
+            self.AFD_semantic_7_R_T = AFD_semantic(960, 0.0625)
+            self.AFD_semantic_6_R_T = AFD_semantic(160, 0.0625)
+            self.AFD_semantic_5_R_T = AFD_semantic(112, 0.0625)
             self.AFD_semantic_4_R_T = AFD_semantic(80, 0.0625)
-            self.AFD_semantic_3_R_T = AFD_semantic(40, 0.0625)
+            self.AFD_spatial_4_R_T = AFD_spatial(80)
             self.AFD_spatial_3_R_T = AFD_spatial(40)
             self.AFD_spatial_2_R_T = AFD_spatial(24)
             self.AFD_spatial_1_R_T = AFD_spatial(16)
