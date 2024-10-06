@@ -43,29 +43,29 @@ class LSNetEx(Module):
         self.depth_pretrained = MobileNetV3Large(pretrained=True)
         
         # Upsample_model
-        self.upsample1_g = self.__sequential((76, 38, 3, 1, 1, ), 38)
-        self.upsample2_g = self.__sequential((118, 60, 3, 1, 1, ), 60)
-        self.upsample3_g = self.__sequential((188, 94, 3, 1, 1, ), 94)
-        self.upsample4_g = self.__sequential((296, 148, 3, 1, 1, ), 148)
-        self.upsample5_g = self.__sequential((224, 212, 3, 1, 1, ), 212)
-        self.upsample6_g = self.__sequential((320, 160, 3, 1, 1, ), 160)
-        self.upsample7_g = self.__sequential((960, 480, 3, 1, 1, ), 480)
+        self.upsample1_g = self.__sequential((136, 68, 3, 1, 1, ), 68)
+        self.upsample2_g = self.__sequential((206, 104, 3, 1, 1, ), 104)
+        self.upsample3_g = self.__sequential((316, 158, 3, 1, 1, ), 158)
+        self.upsample4_g = self.__sequential((472, 236, 3, 1, 1, ), 236)
+        self.upsample5_g = self.__sequential((624, 312, 3, 1, 1, ), 312, 1)
+        self.upsample6_g = self.__sequential((800, 400, 3, 1, 1, ), 400)
+        self.upsample7_g = self.__sequential((960, 480, 3, 1, 1, ), 480, 1)
         
-        self.conv_g = Conv2d(38, 1, 1)
-        self.conv2_g = Conv2d(60, 1, 1)
-        self.conv3_g = Conv2d(94, 1, 1)
+        self.conv_g = Conv2d(68, 1, 1)
+        self.conv2_g = Conv2d(104, 1, 1)
+        self.conv3_g = Conv2d(158, 1, 1)
 
         # Tips: speed test and params and more this part is not included.
         # please comment this part when involved.
         if self.training:
             self.AFD_semantic_7_R_T = AFD_semantic(960, 0.0625)
-            self.AFD_semantic_6_R_T = AFD_semantic(160, 0.0625)
-            self.AFD_semantic_5_R_T = AFD_semantic(112, 0.0625)
-            self.AFD_semantic_4_R_T = AFD_semantic(80, 0.0625)
-            self.AFD_spatial_4_R_T = AFD_spatial(80)
-            self.AFD_spatial_3_R_T = AFD_spatial(40)
-            self.AFD_spatial_2_R_T = AFD_spatial(24)
-            self.AFD_spatial_1_R_T = AFD_spatial(16)
+            self.AFD_semantic_6_R_T = AFD_semantic(320, 0.0625)
+            self.AFD_semantic_5_R_T = AFD_semantic(224, 0.0625)
+            self.AFD_semantic_4_R_T = AFD_semantic(160, 0.0625)
+            self.AFD_spatial_4_R_T = AFD_spatial(160)
+            self.AFD_spatial_3_R_T = AFD_spatial(80)
+            self.AFD_spatial_2_R_T = AFD_spatial(48)
+            self.AFD_spatial_1_R_T = AFD_spatial(32)
 
     def _load_small(self):
         self.rgb_pretrained = MobileNetV3Small()
@@ -157,8 +157,10 @@ class LSNetEx(Module):
         F1 = A1_t + A1
 
         F7 = self.upsample7_g(F7)
+        F6 = cat((F6, F7), dim=1)
         F6 = self.upsample6_g(F6)
-        F5 = self.upsample5_g(F5)
+        F5 = cat((F5, F6), dim=1)
+        F5 = self.upsample5_g(F5)        
         F4 = cat((F4, F5), dim=1)
         F4 = self.upsample4_g(F4)
         F3 = cat((F3, F4), dim=1)
@@ -181,8 +183,9 @@ class LSNetEx(Module):
             loss_semantic_5_T_R = self.AFD_semantic_5_R_T(A5_t, A5.detach())
             loss_semantic_4_R_T = self.AFD_semantic_4_R_T(A4, A4_t.detach())
             loss_semantic_4_T_R = self.AFD_semantic_4_R_T(A4_t, A4.detach())
-            loss_semantic_3_R_T = self.AFD_semantic_3_R_T(A3, A3_t.detach())
-            loss_semantic_3_T_R = self.AFD_semantic_3_R_T(A3_t, A3.detach())
+
+            loss_spatial_4_R_T = self.AFD_spatial_4_R_T(A4, A4_t.detach())
+            loss_spatial_4_T_R = self.AFD_spatial_4_R_T(A4_t, A4.detach())
             loss_spatial_3_R_T = self.AFD_spatial_3_R_T(A3, A3_t.detach())
             loss_spatial_3_T_R = self.AFD_spatial_3_R_T(A3_t, A3.detach())
             loss_spatial_2_R_T = self.AFD_spatial_2_R_T(A2, A2_t.detach())
@@ -193,7 +196,8 @@ class LSNetEx(Module):
                       loss_semantic_6_R_T + loss_semantic_6_T_R + \
                       loss_semantic_5_R_T + loss_semantic_5_T_R + \
                       loss_semantic_4_R_T + loss_semantic_4_T_R + \
-                      loss_semantic_3_R_T + loss_semantic_3_T_R + \
+                      loss_semantic_4_R_T + loss_semantic_4_T_R + \
+                      loss_spatial_4_R_T + loss_spatial_4_T_R + \
                       loss_spatial_3_R_T + loss_spatial_3_T_R + \
                       loss_spatial_2_R_T + loss_spatial_2_T_R + \
                       loss_spatial_1_R_T + loss_spatial_1_T_R
@@ -257,5 +261,5 @@ class LSNetEx(Module):
             Conv2d(conv2d[0], conv2d[1], conv2d[2], conv2d[3], conv2d[4], ), 
             BatchNorm2d(batch_norm), 
             GELU(),
-            UpsamplingBilinear2d(scale_factor=scale, )
+            UpsamplingBilinear2d(scale_factor=scale)
         )
