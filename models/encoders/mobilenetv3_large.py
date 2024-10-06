@@ -1,5 +1,5 @@
 from torch import Tensor
-from torch.nn import Module
+from torch.nn import Module, Conv2d
 from torchvision.models.mobilenetv3 import mobilenet_v3_large, MobileNet_V3_Large_Weights
 
 class MobileNetV3Large(Module):
@@ -30,22 +30,27 @@ class MobileNetV3Large(Module):
 
         """
         x = self.features[:2](x)
-        out1 = x
+        out1 = self._transition_layer(16, 32, x)
         x = self.features[2:4](x)
-        out2 = x
+        out2 = self._transition_layer(24, 48, x)
         x = self.features[4:7](x)
-        out3 = x
+        out3 = self._transition_layer(40, 80, x)
         x = self.features[7:10](x)
-        out4 = x
+        out4 = self._transition_layer(80, 160, x)
         x = self.features[10:13](x)
-        out5 = x
+        out5 = self._transition_layer(112, 224, x)
         x = self.features[13:16](x)
-        out6 = x
+        out6 = self._transition_layer(160, 320, x)
         x = self.features[16:](x)
         out7 = x
         
 
         return out1, out2, out3, out4, out5, out6, out7
+
+    def _transition_layer(self, in_channels, out_channels, feature):
+        t = Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=1)
+        t.to('cuda')
+        return t(feature)
 
 if __name__ == '__main__':
     import torch
