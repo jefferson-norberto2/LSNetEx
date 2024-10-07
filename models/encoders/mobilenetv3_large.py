@@ -1,4 +1,4 @@
-from torch import Tensor
+from torch import Tensor, cuda
 from torch.nn import Module, Conv2d
 from torchvision.models.mobilenetv3 import mobilenet_v3_large, MobileNet_V3_Large_Weights
 
@@ -48,9 +48,10 @@ class MobileNetV3Large(Module):
         return out1, out2, out3, out4, out5, out6, out7
 
     def _transition_layer(self, in_channels, out_channels, feature):
-        t = Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=1)
-        t.to('cuda')
-        return t(feature)
+        transfer = Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=1)
+        if (cuda.is_available()):
+            transfer.to('cuda')
+        return transfer(feature)
 
 if __name__ == '__main__':
     import torch
