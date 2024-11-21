@@ -8,7 +8,7 @@ parser.add_argument('--task', type=str, default=task, help='type task (RGBT or R
 parser.add_argument('--epoch', type=int, default=20, help='epoch number')
 parser.add_argument('--network', type=int, default=0, help='Choose network encoder: 0 -> V2 Acrticle, 1 -> V2 Pytorch, 2 -> V3 Small, 3 -> V3 Large')
 parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
-parser.add_argument('--batchsize', type=int, default=4, help='training batch size')
+parser.add_argument('--batchsize', type=int, default=10, help='training batch size')
 parser.add_argument('--trainsize', type=int, default=224, help='training dataset size')
 parser.add_argument('--clip', type=float, default=0.5, help='gradient clipping margin')
 parser.add_argument('--decay_rate', type=float, default=0.1, help='decay rate of learning rate')

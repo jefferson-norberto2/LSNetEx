@@ -3,7 +3,7 @@ from torch.nn import Module, Sequential, Conv2d, UpsamplingBilinear2d, GELU, Bat
 from models.utils.afd_semantic import AFD_semantic
 from models.utils.afd_spatial import AFD_spatial
 from models import mobilenet_v2
-from models.utils.cross_attention import CrossAttentionModule
+
 
 class LSNetEx(Module):
     def __init__(self, network=0):
@@ -16,13 +16,6 @@ class LSNetEx(Module):
     def _load_v2(self, network=0):
         self.rgb_pretrained = mobilenet_v2()
         self.depth_pretrained = mobilenet_v2()
-
-        # Cross-attention modules for each feature level
-        self.cross_attention_5 = CrossAttentionModule(embed_dim=320, num_heads=8)
-        self.cross_attention_4 = CrossAttentionModule(embed_dim=96, num_heads=4)
-        self.cross_attention_3 = CrossAttentionModule(embed_dim=32, num_heads=2)
-        self.cross_attention_2 = CrossAttentionModule(embed_dim=24, num_heads=2)
-        self.cross_attention_1 = CrossAttentionModule(embed_dim=16, num_heads=2)
 
         bn1 = 34
         bn2 = 52
@@ -56,12 +49,11 @@ class LSNetEx(Module):
         # ti
         A1_t, A2_t, A3_t, A4_t, A5_t = self.depth_pretrained(ti)
 
-        # Apply Cross-Attention for each feature level
-        F5 = self.cross_attention_5(A5, A5_t, A5_t)
-        F4 = self.cross_attention_4(A4, A4_t, A4_t)
-        F3 = self.cross_attention_3(A3, A3_t, A3_t)
-        F2 = self.cross_attention_2(A2, A2_t, A2_t)
-        F1 = self.cross_attention_1(A1, A1_t, A1_t)
+        F5 = A5_t + A5
+        F4 = A4_t + A4
+        F3 = A3_t + A3
+        F2 = A2_t + A2
+        F1 = A1_t + A1
 
         F5 = self.upsample5_g(F5)
         F4 = cat((F4, F5), dim=1)
