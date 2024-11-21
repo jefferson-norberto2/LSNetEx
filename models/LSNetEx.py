@@ -18,8 +18,8 @@ class LSNetEx(Module):
         self.depth_pretrained = mobilenet_v2()
 
         # Cross-attention modules for each feature level
-        self.cross_attention_5 = CrossAttentionModule(embed_dim=320, num_heads=8)
-        self.cross_attention_4 = CrossAttentionModule(embed_dim=96, num_heads=4)
+        self.cross_attention_5 = CrossAttentionModule(embed_dim=320, num_heads=4)
+        self.cross_attention_4 = CrossAttentionModule(embed_dim=96, num_heads=2)
         self.cross_attention_3 = CrossAttentionModule(embed_dim=32, num_heads=2)
         self.cross_attention_2 = CrossAttentionModule(embed_dim=24, num_heads=2)
         self.cross_attention_1 = CrossAttentionModule(embed_dim=16, num_heads=2)
