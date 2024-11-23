@@ -1,7 +1,7 @@
 from os import makedirs, environ
 from os.path import exists
 
-from torch import load, cat, sigmoid, tensor, save, no_grad, sum, abs, numel, as_tensor, cuda, device
+from torch import load, cat, sigmoid, tensor, save, no_grad, sum, abs, numel, as_tensor, cuda, device, amp
 from torch.optim import Adam
 from torch.nn.functional import interpolate
 from torch.nn import BCEWithLogitsLoss
@@ -95,7 +95,7 @@ step = 0
 writer = SummaryWriter(save_path + 'summary', flush_secs=30)
 best_mae = 1
 best_epoch = 0
-Sacler = cuda.amp.GradScaler('cuda' if cuda.is_available() else 'cpu')
+Sacler = amp.GradScaler('cuda' if cuda.is_available() else 'cpu')
 
 # train function
 def train(train_loader, model, optimizer, epoch, save_path, device):
