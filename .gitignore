@@ -1,5 +1,7 @@
 Datasets/*
 Runs/*
+runs/*
+wandb/*
 __pycache__/*
 RGBT_dataset/*
 RGBD_dataset/*

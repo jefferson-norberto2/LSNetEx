@@ -21,87 +21,22 @@ from models.LSNetEx import LSNetEx
 from dataloader.dataset import get_loader
 from dataloader.test_dataset import TestDataset
 
+import wandb
+
 # set the device for training
 cudnn.benchmark = True
 cudnn.enabled = True
 
 environ["CUDA_VISIBLE_DEVICES"] = opt.gpu_id
 
-# build the model
-model = LSNetEx(network=opt.network)
-params = model.parameters()
-optimizer = Adam(params, opt.lr)
-
-# Load model state_dict if specified
-if opt.load is not None:
-    model.load_state_dict(load(opt.load))
-    print('Loaded model from', opt.load)
-
-# Set device for model
-run_device = device('cuda' if cuda.is_available() else 'cpu')
-model.to(run_device)
-print('Runing on', run_device)
-
-# Set the path
-train_dataset_path = opt.train_root
-val_dataset_path = opt.val_root
-save_path = opt.save_path
-
-# Check if save path exists, create if not
-if not exists(save_path):
-    makedirs(save_path)
-
-# Load data paths
-image_root = train_dataset_path + '/RGB/'
-gt_root = train_dataset_path + '/GT/'
-val_image_root = val_dataset_path + '/RGB/'
-val_gt_root = val_dataset_path + '/GT/'
-
-# Determine task-specific data paths
-if opt.task == 'RGBT':
-    ti_root = train_dataset_path + '/T/'
-    val_ti_root = val_dataset_path + '/T/'
-elif opt.task == 'RGBD':
-    ti_root = train_dataset_path + '/depth/'
-    val_ti_root = val_dataset_path + '/depth/'
-else:
-    raise ValueError(f"Unknown task type {opt.task}")
-
-# Load data loaders
-train_loader = get_loader(image_root, gt_root, ti_root, batchsize=opt.batchsize, trainsize=opt.trainsize, task=opt.task)
-test_loader =  TestDataset(val_image_root, val_gt_root, val_ti_root, opt.trainsize, task=opt.task)
-total_step = len(train_loader)
-
-# Set up logging
-log_file_path = save_path + 'log.log'
-basicConfig(filename=log_file_path, format='[%(asctime)s-%(filename)s-%(levelname)s:%(message)s]',
-             level=INFO, filemode='a', datefmt='%Y-%m-%d %I:%M:%S %p')
-info("Model:")
-info(model)
-info(save_path + "Train")
-info("Config")
-info(
-    'epoch:{};lr:{};batchsize:{};trainsize:{};clip:{};decay_rate:{};load:{};save_path:{};decay_epoch:{}'.format(
-        opt.epoch, opt.lr, opt.batchsize, opt.trainsize, opt.clip, opt.decay_rate, opt.load, save_path,
-        opt.decay_epoch))
-
-# Set up loss functions
-CE = BCEWithLogitsLoss().to(run_device)
-IOUBCE = IOUBCE_loss().to(run_device)
-IOUBCEWithoutLogits = IOUBCEWithoutLogits_loss().to(run_device)
-
-# Initialize other variables
-step = 0
-writer = SummaryWriter(save_path + 'summary', flush_secs=30)
-best_mae = 1
-best_epoch = 0
-Sacler = cuda.amp.GradScaler('cuda' if cuda.is_available() else 'cpu')
-
 # train function
 def train(train_loader, model, optimizer, epoch, save_path, device):
     global step
     model.train()
     loss_all = 0
+    loss_sod_all = 0
+    loss_bound_all = 0
+    loss_trans_all = 0
     epoch_step = 0
     try:
         for i, (images, gts, tis) in enumerate(train_loader, start=1):
@@ -144,6 +79,9 @@ def train(train_loader, model, optimizer, epoch, save_path, device):
             step = step + 1
             epoch_step = epoch_step + 1
             loss_all = loss.item() + loss_all
+            loss_trans_all = loss_trans.item() + loss_trans_all
+            loss_sod_all = loss_sod.item() + loss_sod_all
+            loss_bound_all = loss_bound.item() + loss_bound_all
             if i % 10 == 0 or i == total_step or i == 1:
                 print('{} Epoch [{:03d}/{:03d}], Step [{:04d}/{:04d}], Loss: {:.4f}, loss_sod: {:.4f},'
                       'loss_bound: {:.4f},loss_trans: {:.4f}'.
@@ -154,6 +92,9 @@ def train(train_loader, model, optimizer, epoch, save_path, device):
                              format(epoch, opt.epoch, i, total_step, loss.item(),
                                     loss_sod.item(),loss_bound.item(), loss_trans.item()))
                 writer.add_scalar('Loss', loss, global_step=step)
+                writer.add_scalar('Loss bound', loss_bound, global_step=step)
+                writer.add_scalar('Loss trans', loss_trans, global_step=step)
+                writer.add_scalar('Loss SOD', loss_sod, global_step=step)
                 grid_image = make_grid(gts[0].clone().cpu().data, 1, normalize=True)
                 writer.add_image('train/Ground_truth', grid_image, step)
                 grid_image = make_grid(bound[0].clone().cpu().data, 1, normalize=True)
@@ -170,7 +111,13 @@ def train(train_loader, model, optimizer, epoch, save_path, device):
 
 
         loss_all /= epoch_step
-        writer.add_scalar('Loss-epoch', loss_all, global_step=epoch)
+        loss_sod_all /= epoch_step
+        loss_trans_all /= epoch_step
+        loss_bound_all /= epoch_step
+        writer.add_scalar('Loss-epoch', loss_all, global_step=step)
+        writer.add_scalar('Loss-bound-epoch', loss_bound_all, global_step=step)
+        writer.add_scalar('Loss-trans-epoch', loss_trans_all, global_step=step)
+        writer.add_scalar('Loss-SOD-epoch', loss_sod_all, global_step=step)
         if (epoch) % 5 == 0:
             save(model.state_dict(), save_path + 'Net_epoch_{}.pth'.format(epoch))
     except KeyboardInterrupt:
@@ -218,9 +165,81 @@ def test(test_loader, model, epoch, save_path, device):
 
 
 if __name__ == '__main__':
+    # build the model
+    model = LSNetEx(network=opt.network)
+    params = model.parameters()
+    optimizer = Adam(params, opt.lr)
+
+    # Load model state_dict if specified
+    if opt.load is not None:
+        model.load_state_dict(load(opt.load))
+        print('Loaded model from', opt.load)
+
+    # Set device for model
+    run_device = device('cuda' if cuda.is_available() else 'cpu')
+    model.to(run_device)
+    print('Runing on', run_device)
+
+    # Set the path
+    train_dataset_path = opt.train_root
+    val_dataset_path = opt.val_root
+    save_path = opt.save_path
+
+    # Check if save path exists, create if not
+    if not exists(save_path):
+        makedirs(save_path)
+
+    # Load data paths
+    image_root = train_dataset_path + '/RGB/'
+    gt_root = train_dataset_path + '/GT/'
+    val_image_root = val_dataset_path + '/RGB/'
+    val_gt_root = val_dataset_path + '/GT/'
+
+    # Determine task-specific data paths
+    if opt.task == 'RGBT':
+        ti_root = train_dataset_path + '/T/'
+        val_ti_root = val_dataset_path + '/T/'
+    elif opt.task == 'RGBD':
+        ti_root = train_dataset_path + '/depth/'
+        val_ti_root = val_dataset_path + '/depth/'
+    else:
+        raise ValueError(f"Unknown task type {opt.task}")
+
+    # Load data loaders
+    train_loader = get_loader(image_root, gt_root, ti_root, batchsize=opt.batchsize, trainsize=opt.trainsize, task=opt.task)
+    test_loader =  TestDataset(val_image_root, val_gt_root, val_ti_root, opt.trainsize, task=opt.task)
+    total_step = len(train_loader)
+
+    # Set up logging
+    log_file_path = save_path + 'log.log'
+    basicConfig(filename=log_file_path, format='[%(asctime)s-%(filename)s-%(levelname)s:%(message)s]',
+                level=INFO, filemode='a', datefmt='%Y-%m-%d %I:%M:%S %p')
+    info("Model:")
+    info(model)
+    info(save_path + "Train")
+    info("Config")
+    info(
+        'epoch:{};lr:{};batchsize:{};trainsize:{};clip:{};decay_rate:{};load:{};save_path:{};decay_epoch:{}'.format(
+            opt.epoch, opt.lr, opt.batchsize, opt.trainsize, opt.clip, opt.decay_rate, opt.load, save_path,
+            opt.decay_epoch))
+
+    # Set up loss functions
+    CE = BCEWithLogitsLoss().to(run_device)
+    IOUBCE = IOUBCE_loss().to(run_device)
+    IOUBCEWithoutLogits = IOUBCEWithoutLogits_loss().to(run_device)
+
+    # Initialize other variables
+    step = 0
+    best_mae = 1
+    best_epoch = 0
+    Sacler = cuda.amp.GradScaler('cuda' if cuda.is_available() else 'cpu')
+
     print("Start train...")
+    wandb.init(project="LSNet", sync_tensorboard=True, name='run')
+    writer = SummaryWriter(save_path + 'summary', flush_secs=30)
     for epoch in range(1, opt.epoch+1):
         cur_lr = adjust_lr(optimizer, opt.lr, epoch, opt.decay_rate, opt.decay_epoch)
-        writer.add_scalar('learning_rate', cur_lr, global_step=epoch)
+        writer.add_scalar('learning_rate', cur_lr, global_step=step)
         train(train_loader, model, optimizer, epoch, save_path, run_device)
         test(test_loader, model, epoch, save_path, run_device)
+    wandb.finish()
