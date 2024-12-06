@@ -1,7 +1,7 @@
 from os import makedirs, environ
 from os.path import exists
 
-from torch import load, cat, sigmoid, tensor, save, no_grad, sum, abs, numel, as_tensor, cuda, device
+from torch import load, cat, sigmoid, tensor, save, no_grad, sum, abs, numel, as_tensor, cuda, device, amp
 from torch.optim import Adam
 from torch.nn.functional import interpolate
 from torch.nn import BCEWithLogitsLoss

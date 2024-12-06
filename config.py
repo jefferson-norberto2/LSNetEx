@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 from datetime import datetime
 
+root = r'C:\Users\jeff_\Documents\dev\python\datasets'
 task = 'RGBT'
 network = 0
 save_path = f'network_{network}_{datetime.now()}'
