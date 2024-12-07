@@ -8,18 +8,18 @@ from torch.nn import BCEWithLogitsLoss
 
 from datetime import datetime
 from torchvision.utils import make_grid
-from models.utils.IOUBCE_without_logits_loss import IOUBCEWithoutLogits_loss
-from models.utils.IOUBCE_loss import IOUBCE_loss
-from utils import adjust_lr, tesnor_bound
+from lsnetex.models.utils.IOUBCE_without_logits_loss import IOUBCEWithoutLogits_loss
+from lsnetex.models.utils.IOUBCE_loss import IOUBCE_loss
+from lsnetex.utils import adjust_lr, tesnor_bound
 
 from tensorboardX import SummaryWriter
 from logging import basicConfig, info, INFO
 from torch.backends import cudnn
-from config import opt
+from lsnetex.config import opt
 
-from models.LSNetEx import LSNetEx
-from dataloader.dataset import get_loader
-from dataloader.test_dataset import TestDataset
+from lsnetex.models.LSNetEx import LSNetEx
+from lsnetex.dataloader.dataset import get_loader
+from lsnetex.dataloader.test_dataset import TestDataset
 
 import wandb
 
@@ -235,7 +235,16 @@ if __name__ == '__main__':
     Sacler = cuda.amp.GradScaler('cuda' if cuda.is_available() else 'cpu')
 
     print("Start train...")
-    wandb.init(project="LSNet", sync_tensorboard=True, name='run')
+    wandb.init(
+        project="LSNetEx", 
+        sync_tensorboard=True, 
+        name='v2_article',
+        config={
+        "learning_rate": 0.00005,
+        "architecture": "CNN",
+        "dataset": "RGBT",
+        "epochs": 20,
+        })
     writer = SummaryWriter(save_path + 'summary', flush_secs=30)
     for epoch in range(1, opt.epoch+1):
         cur_lr = adjust_lr(optimizer, opt.lr, epoch, opt.decay_rate, opt.decay_epoch)

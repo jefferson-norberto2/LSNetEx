@@ -3,7 +3,7 @@ import torch.utils.data as data
 import torchvision.transforms as transforms
 
 from PIL import Image
-from dataloader.data_agumentation import * 
+from lsnetex.dataloader.data_agumentation import * 
 
 # dataset for training
 # The current loader is not using the normalized ti maps for training and test. If you use the normalized ti maps

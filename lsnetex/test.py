@@ -2,9 +2,9 @@ from torch import device, load, cat, no_grad, sigmoid, sum, abs, numel
 from torch.cuda import is_available
 from tqdm import tqdm
 
-from dataloader.test_dataset import TestDataset
-from models.LSNetEx import LSNetEx
-from config import opt
+from lsnetex.dataloader.test_dataset import TestDataset
+from lsnetex.models.LSNetEx import LSNetEx
+from lsnetex.config import opt
 
 dataset_path = opt.test_path
 model_path = opt.model_path

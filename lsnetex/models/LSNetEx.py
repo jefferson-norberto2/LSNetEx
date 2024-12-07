@@ -1,8 +1,8 @@
 from torch import cat
 from torch.nn import Module, Sequential, Conv2d, UpsamplingBilinear2d, GELU, BatchNorm2d
-from models.utils.afd_semantic import AFD_semantic
-from models.utils.afd_spatial import AFD_spatial
-from models import MobileNetV2Pytorch, MobileNetV3Large, MobileNetV3Small, mobilenet_v2
+from lsnetex.models.utils.afd_semantic import AFD_semantic
+from lsnetex.models.utils.afd_spatial import AFD_spatial
+from lsnetex.models import MobileNetV2Pytorch, MobileNetV3Large, MobileNetV3Small, mobilenet_v2
 
 class LSNetEx(Module):
     """
