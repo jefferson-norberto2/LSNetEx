@@ -12,7 +12,7 @@ save_path = save_path.replace(' ', '_')
 # train/val
 parser.add_argument('--task', type=str, default=task, help='type task (RGBT or RGBD)')
 parser.add_argument('--epoch', type=int, default=20, help='epoch number')
-parser.add_argument('--network', type=int, default=network, help='Choose network encoder: 0 -> V2 Acrticle, 1 -> V2 Pytorch, 2 -> V3 Small, 3 -> V3 Large')
+parser.add_argument('--network', type=int, default=network, help='Choose network encoder: 0 -> V2 Acrticle, 1 -> V3 Small, 2 -> V3 Large, 3 -> V3 Large++')
 parser.add_argument('--lr', type=float, default=0.00005, help='learning rate')
 parser.add_argument('--batchsize', type=int, default=10, help='training batch size')
 parser.add_argument('--trainsize', type=int, default=224, help='training dataset size')

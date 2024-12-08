@@ -2,7 +2,7 @@ from torch import Tensor, cuda
 from torch.nn import Module, Conv2d
 from torchvision.models.mobilenetv3 import mobilenet_v3_large, MobileNet_V3_Large_Weights
 
-class MobileNetV3TwoLayers(Module):
+class MobileNetV3LargePlusPlus(Module):
     """
     Extended version of MobileNetV3 model.
 
@@ -10,7 +10,7 @@ class MobileNetV3TwoLayers(Module):
         pretrained (bool): pretrained network.
     """
     def __init__(self, pretrained=True) -> None:
-        super(MobileNetV3TwoLayers, self).__init__()
+        super(MobileNetV3LargePlusPlus, self).__init__()
         _weights = MobileNet_V3_Large_Weights.IMAGENET1K_V2 if pretrained else None
         _model = mobilenet_v3_large(weights = _weights)
         self.features = _model.features
@@ -37,20 +37,18 @@ class MobileNetV3TwoLayers(Module):
         out3 = x
         x = self.features[7:10](x)
         out4 = x
-        x = self.features[10:](x)
+        x = self.features[10:13](x)
         out5 = x
+        x = self.features[13:16](x)
+        out6 = x
+        x = self.features[16:](x)
+        out7 = x
 
-        return out1, out2, out3, out4, out5
-        
-    def _transition_layer(self, in_channels, out_channels, feature):
-        transfer = Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=1)
-        if (cuda.is_available()):
-            transfer.to('cuda')
-        return transfer(feature)
+        return out1, out2, out3, out4, out5, out6, out7
 
 if __name__ == '__main__':
     import torch
-    model = MobileNetV3TwoLayers(pretrained=True)
+    model = MobileNetV3LargePlusPlus(pretrained=True)
     rgb = torch.randn(1, 3, 224, 224)
     out = model(rgb)
     for i in out:

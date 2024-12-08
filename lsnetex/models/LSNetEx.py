@@ -2,7 +2,7 @@ from torch import cat
 from torch.nn import Module, Sequential, Conv2d, UpsamplingBilinear2d, GELU, BatchNorm2d
 from lsnetex.models.utils.afd_semantic import AFD_semantic
 from lsnetex.models.utils.afd_spatial import AFD_spatial
-from lsnetex.models import MobileNetV2Pytorch, MobileNetV3Large, MobileNetV3Small, mobilenet_v2
+from lsnetex.models import MobileNetV3Large, MobileNetV3Small, MobileNetV3LargePlusPlus, mobilenet_v2
 
 class LSNetEx(Module):
     """
@@ -27,17 +27,46 @@ class LSNetEx(Module):
             print('LSNet - V2 Article')
             self._load_v2(network)
         elif self.network == 1:
-            print('LSNet - V2 Pytorch')
-            self._load_v2(network)
-        elif self.network == 2:
             print('LSNet - V3 Small')
             self._load_small()
-        elif self.network == 3:
+        elif self.network == 2:
             print('LSNet - V3 Large')
             self._load_large()
+        elif self.network == 3:
+            print('LSNet - V3 Large++')
+            self._load_large_plus_plus()
         else:
             raise Exception('Invalid option network.')
+
+    def _load_large_plus_plus(self):
+        self.rgb_pretrained = MobileNetV3LargePlusPlus()
+        self.depth_pretrained = MobileNetV3LargePlusPlus()
+
+        # Upsample_model
+        self.upsample1_g = self.__sequential((76, 38, 3, 1, 1, ), 38)
+        self.upsample2_g = self.__sequential((118, 60, 3, 1, 1, ), 60)
+        self.upsample3_g = self.__sequential((188, 94, 3, 1, 1, ), 94)
+        self.upsample4_g = self.__sequential((296, 148, 3, 1, 1, ), 148)
+        self.upsample5_g = self.__sequential((432, 216, 3, 1, 1, ), 216, scale=1)
+        self.upsample6_g = self.__sequential((640, 320, 3, 1, 1, ), 320)
+        self.upsample7_g = self.__sequential((960, 480, 3, 1, 1, ), 480, scale=1)
         
+        self.conv_g = Conv2d(38, 1, 1)
+        self.conv2_g = Conv2d(60, 1, 1)
+        self.conv3_g = Conv2d(94, 1, 1)
+
+        # Tips: speed test and params and more this part is not included.
+        # please comment this part when involved.
+        if self.training:
+            self.AFD_semantic_7_R_T = AFD_semantic(960, 0.0625)
+            self.AFD_semantic_6_R_T = AFD_semantic(160, 0.0625)
+            self.AFD_semantic_5_R_T = AFD_semantic(112, 0.0625)
+            self.AFD_semantic_4_R_T = AFD_semantic(80, 0.0625)
+            self.AFD_spatial_4_R_T = AFD_spatial(80)
+            self.AFD_spatial_3_R_T = AFD_spatial(40)
+            self.AFD_spatial_2_R_T = AFD_spatial(24)
+            self.AFD_spatial_1_R_T = AFD_spatial(16)
+
     def _load_large(self):
         self.rgb_pretrained = MobileNetV3Large()
         self.depth_pretrained = MobileNetV3Large()
@@ -88,13 +117,9 @@ class LSNetEx(Module):
             self.AFD_spatial_2_R_T = AFD_spatial(16)
             self.AFD_spatial_1_R_T = AFD_spatial(16)
 
-    def _load_v2(self, network=0):
-        if network == 0:
-            self.rgb_pretrained = mobilenet_v2()
-            self.depth_pretrained = mobilenet_v2()
-        else:
-            self.rgb_pretrained = MobileNetV2Pytorch()
-            self.depth_pretrained = MobileNetV2Pytorch()
+    def _load_v2(self):
+        self.rgb_pretrained = mobilenet_v2()
+        self.depth_pretrained = mobilenet_v2()
 
         bn1 = 34
         bn2 = 52
@@ -134,7 +159,7 @@ class LSNetEx(Module):
             Tuple[Tensor, Tensor, Tensor, Tensor]: Output tensors from the model and additional losses (if in training mode).
 
         """
-        if self.network == 4:
+        if self.network == 3:
             out = self._forward_2d(rgb, ti)
         else:
             out = self._forward_imp(rgb, ti)

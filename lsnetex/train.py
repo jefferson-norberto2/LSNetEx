@@ -235,20 +235,20 @@ if __name__ == '__main__':
     Sacler = cuda.amp.GradScaler('cuda' if cuda.is_available() else 'cpu')
 
     print("Start train...")
-    wandb.init(
-        project="LSNetEx", 
-        sync_tensorboard=True, 
-        name='v3_large',
-        config={
-        "learning_rate": 0.00005,
-        "architecture": "Mobilenetv3",
-        "dataset": "RGBT",
-        "epochs": 20,
-        })
+    # wandb.init(
+    #     project="LSNetEx", 
+    #     sync_tensorboard=True, 
+    #     name='v3_large',
+    #     config={
+    #     "learning_rate": 0.00005,
+    #     "architecture": "Mobilenetv3",
+    #     "dataset": "RGBT",
+    #     "epochs": 20,
+    #     })
     writer = SummaryWriter(save_path + 'summary', flush_secs=30)
     for epoch in range(1, opt.epoch+1):
         cur_lr = adjust_lr(optimizer, opt.lr, epoch, opt.decay_rate, opt.decay_epoch)
         writer.add_scalar('learning_rate', cur_lr, global_step=step)
         train(train_loader, model, optimizer, epoch, save_path, run_device)
         test(test_loader, model, epoch, save_path, run_device)
-    wandb.finish()
+    # wandb.finish()
