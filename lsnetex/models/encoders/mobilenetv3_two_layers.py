@@ -2,7 +2,7 @@ from torch import Tensor, cuda
 from torch.nn import Module, Conv2d
 from torchvision.models.mobilenetv3 import mobilenet_v3_large, MobileNet_V3_Large_Weights
 
-class MobileNetV3Large(Module):
+class MobileNetV3TwoLayers(Module):
     """
     Extended version of MobileNetV3 model.
 
@@ -10,7 +10,7 @@ class MobileNetV3Large(Module):
         pretrained (bool): pretrained network.
     """
     def __init__(self, pretrained=True) -> None:
-        super(MobileNetV3Large, self).__init__()
+        super(MobileNetV3TwoLayers, self).__init__()
         _weights = MobileNet_V3_Large_Weights.IMAGENET1K_V2 if pretrained else None
         _model = mobilenet_v3_large(weights = _weights)
         self.features = _model.features
@@ -50,7 +50,7 @@ class MobileNetV3Large(Module):
 
 if __name__ == '__main__':
     import torch
-    model = MobileNetV3Large(pretrained=True)
+    model = MobileNetV3TwoLayers(pretrained=True)
     rgb = torch.randn(1, 3, 224, 224)
     out = model(rgb)
     for i in out:

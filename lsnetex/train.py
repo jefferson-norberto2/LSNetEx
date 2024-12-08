@@ -238,10 +238,10 @@ if __name__ == '__main__':
     wandb.init(
         project="LSNetEx", 
         sync_tensorboard=True, 
-        name='v2_article',
+        name='v3_large',
         config={
         "learning_rate": 0.00005,
-        "architecture": "CNN",
+        "architecture": "Mobilenetv3",
         "dataset": "RGBT",
         "epochs": 20,
         })

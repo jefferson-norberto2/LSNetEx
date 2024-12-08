@@ -39,33 +39,29 @@ class LSNetEx(Module):
             raise Exception('Invalid option network.')
         
     def _load_large(self):
-        self.rgb_pretrained = MobileNetV3Large(pretrained=True)
-        self.depth_pretrained = MobileNetV3Large(pretrained=True)
-        
+        self.rgb_pretrained = MobileNetV3Large()
+        self.depth_pretrained = MobileNetV3Large()
+
         # Upsample_model
-        self.upsample1_g = self.__sequential((136, 68, 3, 1, 1, ), 68)
-        self.upsample2_g = self.__sequential((206, 104, 3, 1, 1, ), 104)
-        self.upsample3_g = self.__sequential((316, 158, 3, 1, 1, ), 158)
-        self.upsample4_g = self.__sequential((472, 236, 3, 1, 1, ), 236)
-        self.upsample5_g = self.__sequential((624, 312, 3, 1, 1, ), 312, 1)
-        self.upsample6_g = self.__sequential((800, 400, 3, 1, 1, ), 400)
-        self.upsample7_g = self.__sequential((960, 480, 3, 1, 1, ), 480, 1)
+        self.upsample1_g = self.__sequential((108, 54, 3, 1, 1, ), 54)
+        self.upsample2_g = self.__sequential((184, 92, 3, 1, 1, ), 92)
+        self.upsample3_g = self.__sequential((320, 160, 3, 1, 1, ), 160)
+        self.upsample4_g = self.__sequential((560, 280, 3, 1, 1, ), 280)
+        self.upsample5_g = self.__sequential((960, 480, 3, 1, 1, ), 480)
         
-        self.conv_g = Conv2d(68, 1, 1)
-        self.conv2_g = Conv2d(104, 1, 1)
-        self.conv3_g = Conv2d(158, 1, 1)
+        self.conv_g = Conv2d(54, 1, 1)
+        self.conv2_g = Conv2d(92, 1, 1)
+        self.conv3_g = Conv2d(160, 1, 1)
 
         # Tips: speed test and params and more this part is not included.
         # please comment this part when involved.
         if self.training:
-            self.AFD_semantic_7_R_T = AFD_semantic(960, 0.0625)
-            self.AFD_semantic_6_R_T = AFD_semantic(320, 0.0625)
-            self.AFD_semantic_5_R_T = AFD_semantic(224, 0.0625)
-            self.AFD_semantic_4_R_T = AFD_semantic(160, 0.0625)
-            self.AFD_spatial_4_R_T = AFD_spatial(160)
-            self.AFD_spatial_3_R_T = AFD_spatial(80)
-            self.AFD_spatial_2_R_T = AFD_spatial(48)
-            self.AFD_spatial_1_R_T = AFD_spatial(32)
+            self.AFD_semantic_5_R_T = AFD_semantic(960, 0.0625)
+            self.AFD_semantic_4_R_T = AFD_semantic(80, 0.0625)
+            self.AFD_semantic_3_R_T = AFD_semantic(40, 0.0625)
+            self.AFD_spatial_3_R_T = AFD_spatial(40)
+            self.AFD_spatial_2_R_T = AFD_spatial(24)
+            self.AFD_spatial_1_R_T = AFD_spatial(16)
 
     def _load_small(self):
         self.rgb_pretrained = MobileNetV3Small()
@@ -138,7 +134,7 @@ class LSNetEx(Module):
             Tuple[Tensor, Tensor, Tensor, Tensor]: Output tensors from the model and additional losses (if in training mode).
 
         """
-        if self.network == 3:
+        if self.network == 4:
             out = self._forward_2d(rgb, ti)
         else:
             out = self._forward_imp(rgb, ti)

@@ -4,7 +4,7 @@ from datetime import datetime
 
 root = '/mnt/d/python/datasets'
 task = 'RGBT'
-network = 0
+network = 3
 save_path = f'network_{network}_{datetime.now()}'
 save_path = save_path.replace(':', '_')
 save_path = save_path.replace(' ', '_')
