@@ -240,10 +240,10 @@ if __name__ == '__main__':
         sync_tensorboard=True, 
         name='v3_large',
         config={
-        "learning_rate": 0.00005,
+        "learning_rate": opt.lr,
         "architecture": "Mobilenetv3",
         "dataset": "RGBT",
-        "epochs": 20,
+        "epochs":  opt.epoch,
         })
     writer = SummaryWriter(save_path + 'summary', flush_secs=30)
     for epoch in range(1, opt.epoch+1):
