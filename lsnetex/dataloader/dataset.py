@@ -1,6 +1,6 @@
 from torch.utils.data import DataLoader
-from dataloader.salient_depth_dataset import SalientDepthDataset
-from dataloader.salient_thermal_dataset import SalientThermalDataset
+from lsnetex.dataloader.salient_depth_dataset import SalientDepthDataset
+from lsnetex.dataloader.salient_thermal_dataset import SalientThermalDataset
 
 # dataloader for training
 def get_loader(image_root, gt_root, ti_root, batchsize, trainsize, shuffle=True, num_workers=4, pin_memory=False, task='RGBT'):

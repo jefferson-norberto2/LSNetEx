@@ -1,7 +1,7 @@
 import torchvision.transforms as transforms
 
 from PIL import Image
-from dataloader.salient_dataset import SalientDataset 
+from lsnetex.dataloader.salient_dataset import SalientDataset 
 
 # dataset for training
 # The current loader is not using the normalized depth maps for training and test. If you use the normalized depth maps
