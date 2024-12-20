@@ -25,7 +25,7 @@ class LSNetEx(Module):
 
         if self.network == 0:
             print('LSNet - V2 Article')
-            self._load_v2(network)
+            self._load_v2()
         elif self.network == 1:
             print('LSNet - V3 Small')
             self._load_small()

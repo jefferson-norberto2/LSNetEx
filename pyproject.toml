@@ -8,7 +8,6 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "3.9.*"
 tensorboardx = "^2.6.2.2"
-tensorboard = "^2.18.0"
 opencv-python = "^4.10.0.84"
 torch = [
   {url = "https://download.pytorch.org/whl/cu121/torch-2.2.1%2Bcu121-cp39-cp39-linux_x86_64.whl", markers = "sys_platform == 'linux'"}

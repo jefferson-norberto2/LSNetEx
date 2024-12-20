@@ -1,16 +1,18 @@
 from os import makedirs, environ
 from os.path import exists
+import time
 
 from torch import load, cat, sigmoid, tensor, save, no_grad, sum, abs, numel, as_tensor, cuda, device, amp
 from torch.optim import Adam
 from torch.nn.functional import interpolate
 from torch.nn import BCEWithLogitsLoss
+from torch.nn.utils import clip_grad_norm_
 
 from datetime import datetime
 from torchvision.utils import make_grid
 from lsnetex.models.utils.IOUBCE_without_logits_loss import IOUBCEWithoutLogits_loss
 from lsnetex.models.utils.IOUBCE_loss import IOUBCE_loss
-from lsnetex.utils import adjust_lr, tesnor_bound
+from lsnetex.utils import ConvPatchEnhancer, adjust_lr, tesnor_bound, tensor_bound_with_cnn
 
 from tensorboardX import SummaryWriter
 from logging import basicConfig, info, INFO
@@ -30,7 +32,7 @@ cudnn.enabled = True
 environ["CUDA_VISIBLE_DEVICES"] = opt.gpu_id
 
 # train function
-def train(train_loader, model, optimizer, epoch, save_path, device):
+def train(train_loader, model, optimizer, patch_enhancer, epoch, save_path, device):
     global step
     model.train()
     loss_all = 0
@@ -38,9 +40,11 @@ def train(train_loader, model, optimizer, epoch, save_path, device):
     loss_bound_all = 0
     loss_trans_all = 0
     epoch_step = 0
+
     try:
         for i, (images, gts, tis) in enumerate(train_loader, start=1):
             optimizer.zero_grad()
+
             images = images.to(device)
             tis = tis.to(device)
             gts = gts.to(device)
@@ -50,7 +54,7 @@ def train(train_loader, model, optimizer, epoch, save_path, device):
             gts2 = interpolate(gts, (112, 112))
             gts3 = interpolate(gts, (56, 56))
 
-            bound = tesnor_bound(gts, 3).to(device)
+            bound = tensor_bound_with_cnn(gts, 3, patch_enhancer)
             bound2 = interpolate(bound, (112, 112))
             bound3 = interpolate(bound, (56, 56))
 
@@ -60,22 +64,21 @@ def train(train_loader, model, optimizer, epoch, save_path, device):
             loss2 = IOUBCE(out[1], gts2)
             loss3 = IOUBCE(out[2], gts3)
 
-            predict_bound0 = out[0]
-            predict_bound1 = out[1]
-            predict_bound2 = out[2]
-            predict_bound0 = tesnor_bound(sigmoid(predict_bound0), 3)
-            predict_bound1 = tesnor_bound(sigmoid(predict_bound1), 3)
-            predict_bound2 = tesnor_bound(sigmoid(predict_bound2), 3)
+            predict_bound0 = tensor_bound_with_cnn(out[0], 3, patch_enhancer)
+            predict_bound1 = tensor_bound_with_cnn(out[1], 3, patch_enhancer)
+            predict_bound2 = tensor_bound_with_cnn(out[2], 3, patch_enhancer)
             loss6 = IOUBCEWithoutLogits(predict_bound0, bound)
             loss7 = IOUBCEWithoutLogits(predict_bound1, bound2)
             loss8 = IOUBCEWithoutLogits(predict_bound2, bound3)
 
-            loss_sod = loss1 + loss2 + loss3
+            loss_sod = loss1 + loss2 + loss3            
             loss_bound =  loss6 + loss7 + loss8
             loss_trans =  out[3]
             loss = loss_sod + loss_bound + loss_trans
             loss.backward()
-            optimizer.step()
+            
+            optimizer.step()  # Segundo otimizador
+
             step = step + 1
             epoch_step = epoch_step + 1
             loss_all = loss.item() + loss_all
@@ -167,8 +170,10 @@ def test(test_loader, model, epoch, save_path, device):
 if __name__ == '__main__':
     # build the model
     model = LSNetEx(network=opt.network)
-    params = model.parameters()
-    optimizer = Adam(params, opt.lr)
+    patch_enhancer = ConvPatchEnhancer(ksize=3)
+    optimizer = Adam(list(model.parameters()) + list(patch_enhancer.parameters()), opt.lr)
+
+    # Build internal cnn
 
     # Load model state_dict if specified
     if opt.load is not None:
@@ -178,6 +183,7 @@ if __name__ == '__main__':
     # Set device for model
     run_device = device('cuda' if cuda.is_available() else 'cpu')
     model.to(run_device)
+    patch_enhancer.to(run_device)
     print('Runing on', run_device)
 
     # Set the path
@@ -235,20 +241,20 @@ if __name__ == '__main__':
     Sacler = cuda.amp.GradScaler('cuda' if cuda.is_available() else 'cpu')
 
     print("Start train...")
-    wandb.init(
-        project="LSNetEx", 
-        sync_tensorboard=True, 
-        name='v3_large',
-        config={
-        "learning_rate": opt.lr,
-        "architecture": "Mobilenetv3",
-        "dataset": "RGBT",
-        "epochs":  opt.epoch,
-        })
+    # wandb.init(
+    #     project="LSNetEx", 
+    #     sync_tensorboard=True, 
+    #     name='v2_CNN',
+    #     config={
+    #     "learning_rate": opt.lr,
+    #     "architecture": "Mobilenetv2",
+    #     "dataset": "RGBT",
+    #     "epochs":  opt.epoch,
+    #     })
     writer = SummaryWriter(save_path + 'summary', flush_secs=30)
     for epoch in range(1, opt.epoch+1):
         cur_lr = adjust_lr(optimizer, opt.lr, epoch, opt.decay_rate, opt.decay_epoch)
         writer.add_scalar('learning_rate', cur_lr, global_step=step)
-        train(train_loader, model, optimizer, epoch, save_path, run_device)
+        train(train_loader, model, optimizer, patch_enhancer, epoch, save_path, run_device)
         test(test_loader, model, epoch, save_path, run_device)
-    wandb.finish()
+    # wandb.finish()

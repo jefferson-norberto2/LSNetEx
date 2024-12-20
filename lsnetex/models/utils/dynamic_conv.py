@@ -14,6 +14,15 @@ class DynamicConv(nn.Module):
         self.global_avg_pool = nn.AdaptiveAvgPool2d(1)
 
         # Fully connected para calcular pesos dinâmicos
+        self.seq = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels * 2, ksize, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(out_channels*2, out_channels*4, ksize, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(out_channels * 4, out_channels, kernel_size=1)
+        )
+        
+        # Fully connected para calcular pesos dinâmicos
         self.fc = nn.Sequential(
             nn.Linear(in_channels, out_channels * ksize * ksize),
             nn.Sigmoid()
@@ -23,6 +32,7 @@ class DynamicConv(nn.Module):
         self.norm = nn.BatchNorm2d(out_channels)  # Consistência aqui
 
     def forward(self, x):
+        x = self.seq(x)
         B, C, H, W = x.shape
 
         # Gera os pesos dinâmicos
@@ -41,12 +51,14 @@ class DynamicConv(nn.Module):
         x_dynamic = torch.sum(x_unfold * dynamic_weights, dim=3)
         x_dynamic = torch.sum(x_dynamic, dim=3)  # Reduz a dimensão dos canais de entrada
 
+        x_dynamic = nn.Conv2d(x_dynamic.shape[1], self.out_channels, kernel_size=1)(x_dynamic)
+
         # Diagnóstico
         print(f"x_dynamic shape before norm: {x_dynamic.shape}, expected out_channels: {self.out_channels}")
 
         # Normalização
         x_dynamic = self.norm(x_dynamic)  # Deve ser consistente com out_channels
-        return x_dynamic
+        return x
 
 # Implementação do BBA com Dynamic Convolutions
 def tensor_bound_dynamic(img, ksize, dynamic_conv):
