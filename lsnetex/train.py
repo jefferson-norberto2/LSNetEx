@@ -12,7 +12,7 @@ from datetime import datetime
 from torchvision.utils import make_grid
 from lsnetex.models.utils.IOUBCE_without_logits_loss import IOUBCEWithoutLogits_loss
 from lsnetex.models.utils.IOUBCE_loss import IOUBCE_loss
-from lsnetex.utils import ConvPatchEnhancer, adjust_lr, tesnor_bound, tensor_bound_with_cnn
+from lsnetex.utils import ConvPatchEnhancer, adjust_lr, tensor_bound_with_cnn
 
 from tensorboardX import SummaryWriter
 from logging import basicConfig, info, INFO
@@ -35,6 +35,7 @@ environ["CUDA_VISIBLE_DEVICES"] = opt.gpu_id
 def train(train_loader, model, optimizer, patch_enhancer, epoch, save_path, device):
     global step
     model.train()
+    patch_enhancer.train()
     loss_all = 0
     loss_sod_all = 0
     loss_bound_all = 0

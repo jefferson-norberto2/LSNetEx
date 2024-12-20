@@ -63,7 +63,7 @@ class ConvPatchEnhancer(nn.Module):
         return x.view(B, C, H, W)  # Reshape back to original structure
 
 
-def tensor_bound_with_cnn(img, ksize, model, device=0):
+def tensor_bound_with_cnn(img, ksize, model):
     '''
     :param img: tensor, B*C*H*W
     :param ksize: int, size of the patch
