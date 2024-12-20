@@ -1,12 +1,10 @@
 from os import makedirs, environ
 from os.path import exists
-import time
 
 from torch import load, cat, sigmoid, tensor, save, no_grad, sum, abs, numel, as_tensor, cuda, device, amp
 from torch.optim import Adam
 from torch.nn.functional import interpolate
 from torch.nn import BCEWithLogitsLoss
-from torch.nn.utils import clip_grad_norm_
 
 from datetime import datetime
 from torchvision.utils import make_grid
@@ -242,20 +240,21 @@ if __name__ == '__main__':
     Sacler = cuda.amp.GradScaler('cuda' if cuda.is_available() else 'cpu')
 
     print("Start train...")
-    # wandb.init(
-    #     project="LSNetEx", 
-    #     sync_tensorboard=True, 
-    #     name='v2_CNN',
-    #     config={
-    #     "learning_rate": opt.lr,
-    #     "architecture": "Mobilenetv2",
-    #     "dataset": "RGBT",
-    #     "epochs":  opt.epoch,
-    #     })
+    wandb.init(
+        project="LSNetEx", 
+        sync_tensorboard=True, 
+        name='v2_CNN',
+        mode='online',
+        config={
+        "learning_rate": opt.lr,
+        "architecture": "Mobilenetv2",
+        "dataset": "RGBT",
+        "epochs":  opt.epoch,
+        })
     writer = SummaryWriter(save_path + 'summary', flush_secs=30)
     for epoch in range(1, opt.epoch+1):
         cur_lr = adjust_lr(optimizer, opt.lr, epoch, opt.decay_rate, opt.decay_epoch)
         writer.add_scalar('learning_rate', cur_lr, global_step=step)
         train(train_loader, model, optimizer, patch_enhancer, epoch, save_path, run_device)
         test(test_loader, model, epoch, save_path, run_device)
-    # wandb.finish()
+    wandb.finish()
