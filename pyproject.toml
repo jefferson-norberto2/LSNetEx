@@ -10,18 +10,47 @@ python = "3.9.*"
 tensorboardx = "^2.6.2.2"
 tensorboard = "^2.18.0"
 opencv-python = "^4.10.0.84"
-torch = [
-  {url = "https://download.pytorch.org/whl/cu121/torch-2.2.1%2Bcu121-cp39-cp39-linux_x86_64.whl", markers = "sys_platform == 'linux'"}
-]
-torchaudio = [
-    {url = "https://download.pytorch.org/whl/cu121/torchaudio-2.2.1%2Bcu121-cp39-cp39-linux_x86_64.whl", markers = "sys_platform == 'linux'"}
-]
-torchvision = [
-    {url = "https://download.pytorch.org/whl/cu121/torchvision-0.17.1%2Bcu121-cp39-cp39-linux_x86_64.whl", markers = "sys_platform == 'linux'"}
-]
 wandb = "^0.19.0"
 tqdm = "^4.67.1"
+albumentations = "^1.4.24"
+onnxruntime = "^1.20.1"
+pycocotools = "^2.0.8"
+numpy = "1.26.4"
+ruff = "^0.9.0"
+pytest = "^8.3.4"
+taskipy = "^1.14.1"
 
+# Torch 2.2.2 with CUDA 12.1 or higher
+torch = [
+    {url = "https://download.pytorch.org/whl/cu121/torch-2.2.2%2Bcu121-cp312-cp312-win_amd64.whl", platform = "win32"},
+    {url = "https://download.pytorch.org/whl/cu121/torch-2.2.2%2Bcu121-cp312-cp312-linux_x86_64.whl", platform = "linux"}
+]
+torchaudio = [
+    {url = "https://download.pytorch.org/whl/cu121/torchaudio-2.2.2%2Bcu121-cp312-cp312-win_amd64.whl", platform = "win32"},
+    {url = "https://download.pytorch.org/whl/cu121/torchaudio-2.2.2%2Bcu121-cp312-cp312-linux_x86_64.whl", platform = "linux"}
+]
+torchvision = [
+    {url = "https://download.pytorch.org/whl/cu121/torchvision-0.17.2%2Bcu121-cp312-cp312-win_amd64.whl", platform = "win32"},
+    {url = "https://download.pytorch.org/whl/cu121/torchvision-0.17.2%2Bcu121-cp312-cp312-linux_x86_64.whl", platform = "linux"}
+]
+
+[tool.ruff]
+line-length = 79
+extend-exclude = ['migrations']
+
+[tool.ruff.lint]
+preview = true
+select = ['I', 'F', 'E', 'W', 'PL', 'PT']
+
+[tool.ruff.format]
+preview = true
+quote-style = 'single'
+docstring-code-format = true
+docstring-code-line-length = 20
+
+[tool.taskipy.tasks]
+lint = 'ruff check . && ruff check . --diff'
+format = 'ruff check . --fix && ruff format' 
 
 [build-system]
 requires = ["poetry-core"]
