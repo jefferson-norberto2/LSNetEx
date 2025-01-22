@@ -28,6 +28,6 @@ parser.add_argument('--save_path', type=str, default=f'runs/train/{save_path}/',
 # test(predict)
 parser.add_argument('--testsize', type=int, default=224, help='testing size')
 parser.add_argument('--test_path',type=str,default=f'{root}/{task}_dataset/test/',help='test dataset path')
-parser.add_argument('--test_save_path', type=str, default='runs/test/network_1_2025-01-22_14_53_23.059110/', help='path to save run test')
-parser.add_argument('--model_path', type=str, default='runs/train/network_1_2025-01-22_14_53_23.059110/Net_epoch_best.pth', help='path to model')
+parser.add_argument('--test_save_path', type=str, default='runs/train/network_0_2025-01-22_16_00_16.986967/', help='path to save run test')
+parser.add_argument('--model_path', type=str, default='runs/train/network_0_2025-01-22_16_00_16.986967/Net_epoch_best.pth', help='path to model')
 opt = parser.parse_args()
