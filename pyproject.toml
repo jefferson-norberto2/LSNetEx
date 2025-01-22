@@ -51,6 +51,8 @@ docstring-code-line-length = 20
 [tool.taskipy.tasks]
 lint = 'ruff check . && ruff check . --diff'
 format = 'ruff check . --fix && ruff format' 
+run = 'python lsnetex/train.py'
+val = 'python lsnetex/test.py'
 
 [build-system]
 requires = ["poetry-core"]

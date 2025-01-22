@@ -47,8 +47,8 @@ def train(train_loader, model, optimizer, epoch, save_path, device):
             if opt.task == 'RGBD':
                 tis = cat((tis, tis, tis), dim=1)
 
-            gts2 = interpolate(gts, (112, 112))
-            gts3 = interpolate(gts, (56, 56))
+            # gts2 = interpolate(gts, (112, 112))
+            # gts3 = interpolate(gts, (56, 56))
 
             bound = tesnor_bound(gts, 3).to(device)
             bound2 = interpolate(bound, (112, 112))
@@ -57,8 +57,8 @@ def train(train_loader, model, optimizer, epoch, save_path, device):
             out = model(images, tis)
 
             loss1 = IOUBCE(out[0], gts)
-            loss2 = IOUBCE(out[1], gts2)
-            loss3 = IOUBCE(out[2], gts3)
+            # loss2 = IOUBCE(out[1], gts2)
+            # loss3 = IOUBCE(out[2], gts3)
 
             predict_bound0 = out[0]
             predict_bound1 = out[1]
@@ -70,8 +70,8 @@ def train(train_loader, model, optimizer, epoch, save_path, device):
             loss7 = IOUBCEWithoutLogits(predict_bound1, bound2)
             loss8 = IOUBCEWithoutLogits(predict_bound2, bound3)
 
-            loss_sod = loss1 + loss2 + loss3
-            loss_bound =  loss6 + loss7 + loss8
+            loss_sod = loss1
+            loss_bound =  loss6 + loss7 * 0.5 + loss8 * 0.25
             loss_trans =  out[3]
             loss = loss_sod + loss_bound + loss_trans
             loss.backward()
@@ -238,9 +238,9 @@ if __name__ == '__main__':
     wandb.init(
         project="LSNetEx", 
         sync_tensorboard=True, 
-        name='v3_large',
+        name=f'Netork {opt.network}',
         config={
-        "learning_rate": 0.00005,
+        "learning_rate": 1e-4,
         "architecture": "Mobilenetv3",
         "dataset": "RGBT",
         "epochs": 20,

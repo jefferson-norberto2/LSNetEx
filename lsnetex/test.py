@@ -47,6 +47,8 @@ for dataset in test_datasets:
         raise ValueError(f"Unknown task type {opt.task}")
 
 
+    tp_sum, fp_sum, fn_sum, tn_sum, iou_sum, dice_sum = 0, 0, 0, 0, 0, 0
+
     for i in tqdm(range(test_loader.size)):
         image, gt, ti, name = test_loader.load_data()
         gt = gt.to(my_device)
@@ -60,10 +62,35 @@ for dataset in test_datasets:
             res = model(image, ti)
             predict = sigmoid(res)
             predict = (predict - predict.min()) / (predict.max() - predict.min() + 1e-8)
-            mae = sum(abs(predict - gt)) / numel(gt)
-            mae_sum = mae.item() + mae_sum
-            predict = predict.cpu().numpy().squeeze()
+            predict_binary = (predict > 0.5).float()
 
-    test_mae.append(mae_sum / test_loader.size)
+            # MAE
+            mae = sum(abs(predict - gt)) / numel(gt)
+            mae_sum += mae.item()
+
+            # IoU
+            intersection = (predict_binary * gt).sum()
+            union = (predict_binary + gt).clamp(0, 1).sum()
+            iou_sum += (intersection / (union + 1e-8)).item()
+
+            # Dice Coefficient
+            dice_sum += (2 * intersection / (predict_binary.sum() + gt.sum() + 1e-8)).item()
+
+            # True Positives, False Positives, etc.
+            tp_sum += intersection.item()
+            fp_sum += (predict_binary * (1 - gt)).sum().item()
+            fn_sum += ((1 - predict_binary) * gt).sum().item()
+            tn_sum += ((1 - predict_binary) * (1 - gt)).sum().item()
+
+    # Cálculos finais
+    test_mae = mae_sum / test_loader.size
+    test_iou = iou_sum / test_loader.size
+    test_dice = dice_sum / test_loader.size
+    test_precision = tp_sum / (tp_sum + fp_sum + 1e-8)
+    test_recall = tp_sum / (tp_sum + fn_sum + 1e-8)
+    test_specificity = tn_sum / (tn_sum + fp_sum + 1e-8)
+
+    print(f"MAE: {test_mae}, IoU: {test_iou}, Dice: {test_dice}, Precision: {test_precision}, Recall: {test_recall}, Specificity: {test_specificity}")
+
 
 print('Test Done!', 'MAE', test_mae)
