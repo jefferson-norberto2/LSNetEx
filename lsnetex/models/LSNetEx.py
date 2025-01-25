@@ -4,7 +4,6 @@ from torch.nn import Module, Sequential, Conv2d, UpsamplingBilinear2d, GELU, Bat
 from lsnetex.models.utils.afd_semantic import AFD_semantic
 from lsnetex.models.utils.afd_spatial import AFD_spatial
 from lsnetex.models import MobileNetV3Large, MobileNetV3Small, MobileNetV3LargePlusPlus, mobilenet_v2
-from models.utils.af import AttentionFusion
 
 class LSNetEx(Module):
     """
@@ -127,11 +126,6 @@ class LSNetEx(Module):
         self.conv_g = Conv2d(27, 1, 1)
         self.conv2_g = Conv2d(39, 1, 1)
         self.conv3_g = Conv2d(62, 1, 1)
-
-        self.attention_fusion5 = AttentionFusion(in_channels=200)
-        self.attention_fusion4 = AttentionFusion(in_channels=124)
-        self.attention_fusion3 = AttentionFusion(in_channels=78)
-        self.attention_fusion2 = AttentionFusion(in_channels=55)
         
 
         # Tips: speed test and params and more this part is not included.
@@ -288,18 +282,17 @@ class LSNetEx(Module):
             F2 = A2_t + A2
             F1 = A1_t + A1
 
-        F5 = self.upsample5_g(F5)
-        F4 = self.attention_fusion5(F4, F5)
+        F5 = self.upsample5_g(F5)      
+        F4 = cat((F4, F5), dim=1)
         F4 = self.upsample4_g(F4)
-        F3 = self.attention_fusion4(F3, F4)
+        F3 = cat((F3, F4), dim=1)
         F3 = self.upsample3_g(F3)
-        F2 = self.attention_fusion3(F2, F3)
+        F2 = cat((F2, F3), dim=1)
         F2 = self.upsample2_g(F2)
-        F1 = self.attention_fusion2(F1, F2)
+        F1 = cat((F1, F2), dim=1)
         F1 = self.upsample1_g(F1)
 
         out = self.conv_g(F1)
-
 
         if self.training:
             out3 = self.conv3_g(F3)
