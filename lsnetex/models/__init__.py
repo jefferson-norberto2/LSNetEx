@@ -1,5 +1,5 @@
-from models.encoders.mobilenetv3_two_layers import MobileNetV3LargePlusPlus
-from models.encoders.mobilenetv3_large import MobileNetV3Large
-from models.encoders.mobilenetv3_small import MobileNetV3Small
-from models.encoders.mobilenetv2_article import mobilenet_v2
+from lsnetex.models.encoders.mobilenetv3_two_layers import MobileNetV3LargePlusPlus
+from lsnetex.models.encoders.mobilenetv3_large import MobileNetV3Large
+from lsnetex.models.encoders.mobilenetv3_small import MobileNetV3Small
+from lsnetex.models.encoders.mobilenetv2_article import mobilenet_v2
 

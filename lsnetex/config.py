@@ -4,14 +4,15 @@ from datetime import datetime
 
 root = '../Datasets'
 task = 'RGBT'
-network = 0
+network = 1
 save_path = f'network_{network}_{datetime.now()}'
 save_path = save_path.replace(':', '_')
 save_path = save_path.replace(' ', '_')
+best_model_path = 'runs/train/network_1_2025-01-25_07_38_28.415723/Net_epoch_best.pth'
 
 # train/val
 parser.add_argument('--task', type=str, default=task, help='type task (RGBT or RGBD)')
-parser.add_argument('--epoch', type=int, default=20, help='epoch number')
+parser.add_argument('--epoch', type=int, default=30, help='epoch number')
 parser.add_argument('--network', type=int, default=network, help='Choose network encoder: 0 -> V2 Acrticle, 1 -> V3 Small, 2 -> V3 Large, 3 -> V3 Large++')
 parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
 parser.add_argument('--batchsize', type=int, default=10, help='training batch size')
@@ -28,6 +29,6 @@ parser.add_argument('--save_path', type=str, default=f'runs/train/{save_path}/',
 # test(predict)
 parser.add_argument('--testsize', type=int, default=224, help='testing size')
 parser.add_argument('--test_path',type=str,default=f'{root}/{task}_dataset/test/',help='test dataset path')
-parser.add_argument('--test_save_path', type=str, default='runs/train/network_0_2025-01-22_16_00_16.986967/', help='path to save run test')
-parser.add_argument('--model_path', type=str, default='runs/train/network_0_2025-01-22_16_00_16.986967/Net_epoch_best.pth', help='path to model')
+parser.add_argument('--test_save_path', type=str, default=f'runs/test/{save_path}', help='path to save run test')
+parser.add_argument('--model_path', type=str, default=best_model_path, help='path to model')
 opt = parser.parse_args()

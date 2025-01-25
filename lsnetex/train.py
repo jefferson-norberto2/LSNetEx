@@ -58,6 +58,8 @@ def train(train_loader, model, optimizer, epoch, save_path, device):
             out = model(images, tis)
 
             loss1 = IOUBCE(out[0], gts)
+
+            # If MBV2 using loss SOD from original papper
             if opt.network == 0:
                 loss2 = IOUBCE(out[1], gts2)
                 loss3 = IOUBCE(out[2], gts3)
@@ -72,18 +74,21 @@ def train(train_loader, model, optimizer, epoch, save_path, device):
             loss7 = IOUBCEWithoutLogits(predict_bound1, bound2)
             loss8 = IOUBCEWithoutLogits(predict_bound2, bound3)
 
+            # If MBV2 using loss SOD from original papper
             loss_sod = loss1 if opt.network != 0 else loss1 + loss2 + loss3
             loss_bound =  loss6 + loss7 * 0.5 + loss8 * 0.25
             loss_trans =  out[3]
             loss = loss_sod + loss_bound + loss_trans
             loss.backward()
             optimizer.step()
+
             step = step + 1
             epoch_step = epoch_step + 1
             loss_all = loss.item() + loss_all
             loss_trans_all = loss_trans.item() + loss_trans_all
             loss_sod_all = loss_sod.item() + loss_sod_all
             loss_bound_all = loss_bound.item() + loss_bound_all
+
             if i % 10 == 0 or i == total_step or i == 1:
                 print('{} Epoch [{:03d}/{:03d}], Step [{:04d}/{:04d}], Loss: {:.4f}, loss_sod: {:.4f},'
                       'loss_bound: {:.4f},loss_trans: {:.4f}'.
@@ -241,11 +246,12 @@ if __name__ == '__main__':
         project="LSNetEx", 
         sync_tensorboard=True, 
         name=f'Netork {opt.network}',
+        mode='disabled',
         config={
-        "learning_rate": 1e-4,
+        "learning_rate": opt.lr,
         "architecture": "Mobilenetv3",
         "dataset": "RGBT",
-        "epochs": 20,
+        "epochs": opt.epoch,
         })
     writer = SummaryWriter(save_path + 'summary', flush_secs=30)
     for epoch in range(1, opt.epoch+1):
@@ -253,4 +259,5 @@ if __name__ == '__main__':
         writer.add_scalar('learning_rate', cur_lr, global_step=step)
         train(train_loader, model, optimizer, epoch, save_path, run_device)
         test(test_loader, model, epoch, save_path, run_device)
+    writer.close()
     wandb.finish()

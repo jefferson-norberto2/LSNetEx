@@ -1,3 +1,4 @@
+import time
 from torch import device, load, cat, no_grad, sigmoid, sum, abs, numel
 from torch.cuda import is_available
 from tqdm import tqdm
@@ -5,6 +6,9 @@ from tqdm import tqdm
 from lsnetex.dataloader.test_dataset import TestDataset
 from lsnetex.models.LSNetEx import LSNetEx
 from lsnetex.config import opt
+from tensorboardX import SummaryWriter
+
+import wandb
 
 dataset_path = opt.test_path
 model_path = opt.model_path
@@ -12,6 +16,19 @@ model_path = opt.model_path
 # Verifica se há suporte para GPU
 my_device = device("cuda" if is_available() else "cpu")
 print('Device in use:', my_device)
+
+wandb.init(
+    project="LSNetEx - val", 
+        sync_tensorboard=True, 
+        name=f'Netork {opt.network}',
+        config={
+        "learning_rate": 1e-4,
+        "architecture": "Mobilenetv3",
+        "dataset": "RGBT",
+        "epochs": 20,
+        })
+
+writer = SummaryWriter(opt.test_save_path + 'summary', flush_secs=30)
 
 # Carrega o modelo
 model = LSNetEx(network=opt.network).to(my_device)
@@ -27,7 +44,7 @@ elif opt.task == 'RGBD':
 else:
     raise ValueError(f"Unknown task type {opt.task}")
 
-for dataset in test_datasets:
+for index, dataset in enumerate(test_datasets):
     mae_sum = 0
     save_path = opt.test_save_path
     save_path = dataset + '/'
@@ -90,7 +107,15 @@ for dataset in test_datasets:
     test_recall = tp_sum / (tp_sum + fn_sum + 1e-8)
     test_specificity = tn_sum / (tn_sum + fp_sum + 1e-8)
 
+    writer.add_scalar('MAE', test_mae, global_step=index)
+    writer.add_scalar('IoU', test_iou, global_step=index)
+    writer.add_scalar('Dice', test_dice, global_step=index)
+    writer.add_scalar('Precision', test_precision, global_step=index)
+    writer.add_scalar('Recall', test_recall, global_step=index)
+    writer.add_scalar('Specificity', test_specificity, global_step=index)
     print(f"MAE: {test_mae}, IoU: {test_iou}, Dice: {test_dice}, Precision: {test_precision}, Recall: {test_recall}, Specificity: {test_specificity}")
 
-
-print('Test Done!', 'MAE', test_mae)
+print('Test Done!')
+writer.close()
+wandb.finish()
+time.sleep(5)

@@ -1,8 +1,10 @@
-from torch import cat
-from torch.nn import Module, Sequential, Conv2d, UpsamplingBilinear2d, GELU, BatchNorm2d
+from torch import cat, tensor
+from torch.nn.functional import hardtanh
+from torch.nn import Module, Sequential, Conv2d, UpsamplingBilinear2d, GELU, BatchNorm2d, Parameter
 from lsnetex.models.utils.afd_semantic import AFD_semantic
 from lsnetex.models.utils.afd_spatial import AFD_spatial
 from lsnetex.models import MobileNetV3Large, MobileNetV3Small, MobileNetV3LargePlusPlus, mobilenet_v2
+from models.utils.af import AttentionFusion
 
 class LSNetEx(Module):
     """
@@ -22,21 +24,40 @@ class LSNetEx(Module):
     def __init__(self, network=0):
         super(LSNetEx, self).__init__()
         self.network = network
-
+        
         if self.network == 0:
             print('LSNet - V2 Article')
             self._load_v2()
         elif self.network == 1:
+            self.alpha_5 = Parameter(tensor(0.5))
+            self.alpha_4 = Parameter(tensor(0.5))
+            self.alpha_3 = Parameter(tensor(0.5))
+            self.alpha_2 = Parameter(tensor(0.5))
+            self.alpha_1 = Parameter(tensor(0.5))
             print('LSNet - V3 Small')
             self._load_small()
         elif self.network == 2:
+            self.alpha_5 = Parameter(tensor(0.5))
+            self.alpha_4 = Parameter(tensor(0.5))
+            self.alpha_3 = Parameter(tensor(0.5))
+            self.alpha_2 = Parameter(tensor(0.5))
+            self.alpha_1 = Parameter(tensor(0.5))
             print('LSNet - V3 Large')
             self._load_large()
         elif self.network == 3:
+            # Pesos treináveis para cada nível de fusão
+            self.alpha_7 = Parameter(tensor(0.5))
+            self.alpha_6 = Parameter(tensor(0.5))
+            self.alpha_5 = Parameter(tensor(0.5))
+            self.alpha_4 = Parameter(tensor(0.5))
+            self.alpha_3 = Parameter(tensor(0.5))
+            self.alpha_2 = Parameter(tensor(0.5))
+            self.alpha_1 = Parameter(tensor(0.5))
             print('LSNet - V3 Large++')
             self._load_large_plus_plus()
         else:
             raise Exception('Invalid option network.')
+    
 
     def _load_large_plus_plus(self):
         self.rgb_pretrained = MobileNetV3LargePlusPlus()
@@ -107,6 +128,12 @@ class LSNetEx(Module):
         self.conv2_g = Conv2d(39, 1, 1)
         self.conv3_g = Conv2d(62, 1, 1)
 
+        self.attention_fusion5 = AttentionFusion(in_channels=200)
+        self.attention_fusion4 = AttentionFusion(in_channels=124)
+        self.attention_fusion3 = AttentionFusion(in_channels=78)
+        self.attention_fusion2 = AttentionFusion(in_channels=55)
+        
+
         # Tips: speed test and params and more this part is not included.
         # please comment this part when involved.
         if self.training:
@@ -160,7 +187,22 @@ class LSNetEx(Module):
 
         """
         if self.network == 3:
+            # Normaliza os pesos para que estejam no intervalo [0, 1]
+            self.alpha_7.data = hardtanh(self.alpha_7.data, 0, 1)
+            self.alpha_6.data = hardtanh(self.alpha_6.data, 0, 1)
+            self.alpha_5.data = hardtanh(self.alpha_5.data, 0, 1)
+            self.alpha_4.data = hardtanh(self.alpha_4.data, 0, 1)
+            self.alpha_3.data = hardtanh(self.alpha_3.data, 0, 1)
+            self.alpha_2.data = hardtanh(self.alpha_2.data, 0, 1)
+            self.alpha_1.data = hardtanh(self.alpha_1.data, 0, 1)
             out = self._forward_2d(rgb, ti)
+        elif self.network != 0:
+            self.alpha_5.data = hardtanh(self.alpha_5.data, 0, 1)
+            self.alpha_4.data = hardtanh(self.alpha_4.data, 0, 1)
+            self.alpha_3.data = hardtanh(self.alpha_3.data, 0, 1)
+            self.alpha_2.data = hardtanh(self.alpha_2.data, 0, 1)
+            self.alpha_1.data = hardtanh(self.alpha_1.data, 0, 1)
+            out = self._forward_imp(rgb, ti)
         else:
             out = self._forward_imp(rgb, ti)
         return out
@@ -169,13 +211,14 @@ class LSNetEx(Module):
         A1, A2, A3, A4, A5, A6, A7 = self.rgb_pretrained(rgb)
         A1_t, A2_t, A3_t, A4_t, A5_t, A6_t, A7_t = self.depth_pretrained(ti)
 
-        F7 = A7_t + A7
-        F6 = A6_t + A6
-        F5 = A5_t + A5
-        F4 = A4_t + A4
-        F3 = A3_t + A3
-        F2 = A2_t + A2
-        F1 = A1_t + A1
+        # Aplicando soma ponderada nos níveis intermediários
+        F7 = self.alpha_7 * A7 + (1 - self.alpha_7) * A7_t
+        F6 = self.alpha_6 * A6 + (1 - self.alpha_6) * A6_t
+        F5 = self.alpha_5 * A5 + (1 - self.alpha_5) * A5_t
+        F4 = self.alpha_4 * A4 + (1 - self.alpha_4) * A4_t
+        F3 = self.alpha_3 * A3 + (1 - self.alpha_3) * A3_t
+        F2 = self.alpha_2 * A2 + (1 - self.alpha_2) * A2_t
+        F1 = self.alpha_1 * A1 + (1 - self.alpha_1) * A1_t
 
         F7 = self.upsample7_g(F7)
         F6 = cat((F6, F7), dim=1)
@@ -232,21 +275,27 @@ class LSNetEx(Module):
         # ti
         A1_t, A2_t, A3_t, A4_t, A5_t = self.depth_pretrained(ti)
 
-        F5 = A5_t + A5
-        F4 = A4_t + A4
-        F3 = A3_t + A3
-        F2 = A2_t + A2
-        F1 = A1_t + A1
-
+        if self.network != 0:
+            F5 = self.alpha_5 * A5 + (1 - self.alpha_5) * A5_t
+            F4 = self.alpha_4 * A4 + (1 - self.alpha_4) * A4_t
+            F3 = self.alpha_3 * A3 + (1 - self.alpha_3) * A3_t
+            F2 = self.alpha_2 * A2 + (1 - self.alpha_2) * A2_t
+            F1 = self.alpha_1 * A1 + (1 - self.alpha_1) * A1_t
+        else:
+            F5 = A5_t + A5
+            F4 = A4_t + A4
+            F3 = A3_t + A3
+            F2 = A2_t + A2
+            F1 = A1_t + A1
 
         F5 = self.upsample5_g(F5)
-        F4 = cat((F4, F5), dim=1)
+        F4 = self.attention_fusion5(F4, F5)
         F4 = self.upsample4_g(F4)
-        F3 = cat((F3, F4), dim=1)
+        F3 = self.attention_fusion4(F3, F4)
         F3 = self.upsample3_g(F3)
-        F2 = cat((F2, F3), dim=1)
+        F2 = self.attention_fusion3(F2, F3)
         F2 = self.upsample2_g(F2)
-        F1 = cat((F1, F2), dim=1)
+        F1 = self.attention_fusion2(F1, F2)
         F1 = self.upsample1_g(F1)
 
         out = self.conv_g(F1)

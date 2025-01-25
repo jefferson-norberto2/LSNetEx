@@ -1,0 +1,25 @@
+pretrained_models:
+  rgb: MobileNetV3Small
+  depth: MobileNetV3Small
+
+upsample:
+  - [55, 27, 3, 1, 1]
+  - [78, 39, 3, 1, 1]
+  - [124, 62, 3, 1, 1]
+  - [200, 100, 3, 1, 1]
+  - [576, 160, 3, 1, 1]
+
+conv:
+  - [27, 1, 1]
+  - [39, 1, 1]
+  - [62, 1, 1]
+
+afd_semantic:
+  - [576, 0.0625]
+  - [40, 0.0625]
+  - [24, 0.0625]
+
+afd_spatial:
+  - 24
+  - 16
+  - 16
