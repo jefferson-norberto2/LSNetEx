@@ -25,15 +25,17 @@ class LSNetEx(Module):
         self.network = network
         
         if self.network == 0:
-            print('LSNet - V2 Article')
+            self.name = 'LSNetV2'
+            print(self.name)
             self._load_v2()
         elif self.network == 1:
-            self.alpha_5 = Parameter(tensor(0.5))
-            self.alpha_4 = Parameter(tensor(0.5))
-            self.alpha_3 = Parameter(tensor(0.5))
-            self.alpha_2 = Parameter(tensor(0.5))
-            self.alpha_1 = Parameter(tensor(0.5))
-            print('LSNet - V3 Small')
+            self.alpha_5 = Parameter(tensor(0.2))
+            self.alpha_4 = Parameter(tensor(0.2))
+            self.alpha_3 = Parameter(tensor(0.2))
+            self.alpha_2 = Parameter(tensor(0.2))
+            self.alpha_1 = Parameter(tensor(0.2))
+            self.name = 'LSNet Small'
+            print(self.name)
             self._load_small()
         elif self.network == 2:
             self.alpha_5 = Parameter(tensor(0.5))
@@ -41,7 +43,8 @@ class LSNetEx(Module):
             self.alpha_3 = Parameter(tensor(0.5))
             self.alpha_2 = Parameter(tensor(0.5))
             self.alpha_1 = Parameter(tensor(0.5))
-            print('LSNet - V3 Large')
+            self.name = 'LSNet Large'
+            print(self.name)
             self._load_large()
         elif self.network == 3:
             # Pesos treináveis para cada nível de fusão
@@ -52,7 +55,8 @@ class LSNetEx(Module):
             self.alpha_3 = Parameter(tensor(0.5))
             self.alpha_2 = Parameter(tensor(0.5))
             self.alpha_1 = Parameter(tensor(0.5))
-            print('LSNet - V3 Large++')
+            self.name = 'LSNet Large++'
+            print(self.name)
             self._load_large_plus_plus()
         else:
             raise Exception('Invalid option network.')

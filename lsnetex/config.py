@@ -1,14 +1,13 @@
 from argparse import ArgumentParser
 parser = ArgumentParser()
-from datetime import datetime
 
 root = '../Datasets'
 task = 'RGBT'
-network = 1
-save_path = f'network_{network}_{datetime.now()}'
-save_path = save_path.replace(':', '_')
+network = 0
+save_name = f'network_{network}'
+save_path = save_name.replace(':', '_')
 save_path = save_path.replace(' ', '_')
-best_model_path = 'runs/train/network_1_2025-01-25_07_38_28.415723/Net_epoch_best.pth'
+best_model_path = f'runs/train/{save_name}/Net_epoch_best.pth'
 
 # train/val
 parser.add_argument('--task', type=str, default=task, help='type task (RGBT or RGBD)')
@@ -25,6 +24,7 @@ parser.add_argument('--gpu_id', type=str, default='0', help='select gpu id')
 parser.add_argument('--train_root', type=str, default=f'{root}/{task}_dataset/train', help='the train images root')
 parser.add_argument('--val_root', type=str, default=f'{root}/{task}_dataset/val', help='the val images root')
 parser.add_argument('--save_path', type=str, default=f'runs/train/{save_path}/', help='the path to save models and logs')
+parser.add_argument('--wandb_mode', type=str, default=f'online', help='type mode (disable, offline or online)')
 
 # test(predict)
 parser.add_argument('--testsize', type=int, default=224, help='testing size')

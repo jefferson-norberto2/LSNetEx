@@ -246,11 +246,11 @@ if __name__ == '__main__':
         project="LSNetEx", 
         sync_tensorboard=True, 
         name=f'Netork {opt.network}',
-        mode='disabled',
+        mode=opt.wandb_mode,
         config={
         "learning_rate": opt.lr,
-        "architecture": "Mobilenetv3",
-        "dataset": "RGBT",
+        "architecture": model.name,
+        "dataset": opt.task,
         "epochs": opt.epoch,
         })
     writer = SummaryWriter(save_path + 'summary', flush_secs=30)
