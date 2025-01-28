@@ -3,8 +3,8 @@ parser = ArgumentParser()
 
 root = '../Datasets'
 task = 'RGBT'
-network = 0
-save_name = f'network_{network}'
+network = 1
+save_name = f'network_{network}_ps1'
 save_path = save_name.replace(':', '_')
 save_path = save_path.replace(' ', '_')
 best_model_path = f'runs/train/{save_name}/Net_epoch_best.pth'
