@@ -47,7 +47,8 @@ class AFD_semantic(Module):
         """
         fm_t_pooled = self.avg_pool(fm_t)
         rho = self.attention(fm_t_pooled)
-        rho = sigmoid(rho.squeeze())
+        rho = sigmoid(rho)
+        rho = rho.view(rho.size(0), -1)  # garante shape [B, C]
         rho = rho / sum(rho, dim=1, keepdim=True)
 
         fm_s_norm = norm(fm_s, dim=(2, 3), keepdim=True)

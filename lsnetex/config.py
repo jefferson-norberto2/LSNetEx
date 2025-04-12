@@ -1,17 +1,17 @@
 from argparse import ArgumentParser
 parser = ArgumentParser()
 
-root = '../Datasets'
+root = './Datasets'
 task = 'RGBT'
 network = 1
-save_name = f'network_{network}_ps1'
+save_name = f'network_{network}_{task}'
 save_path = save_name.replace(':', '_')
 save_path = save_path.replace(' ', '_')
 best_model_path = f'runs/train/{save_name}/Net_epoch_best.pth'
 
 # train/val
 parser.add_argument('--task', type=str, default=task, help='type task (RGBT or RGBD)')
-parser.add_argument('--epoch', type=int, default=30, help='epoch number')
+parser.add_argument('--epoch', type=int, default=50, help='epoch number')
 parser.add_argument('--network', type=int, default=network, help='Choose network encoder: 0 -> V2 Acrticle, 1 -> V3 Small, 2 -> V3 Large, 3 -> V3 Large++')
 parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
 parser.add_argument('--batchsize', type=int, default=10, help='training batch size')

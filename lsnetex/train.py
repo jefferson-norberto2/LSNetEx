@@ -245,7 +245,7 @@ if __name__ == '__main__':
     wandb.init(
         project="LSNetEx", 
         sync_tensorboard=True, 
-        name=f'Netork {opt.network}',
+        name=f'Netork {opt.network} {opt.task}',
         mode=opt.wandb_mode,
         config={
         "learning_rate": opt.lr,
