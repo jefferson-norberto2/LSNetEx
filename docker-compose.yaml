@@ -5,13 +5,19 @@ services:
       dockerfile: .docker/Dockerfile
     volumes:
       - .:/app
-      - $HOME/dev/Datasets:/app/Datasets
+      - ${HOME}/dev/Datasets:/app/Datasets
     working_dir: /app
     command: bash
     stdin_open: true
     tty: true
     shm_size: '6gb'
-    deploy: {}  # evita erro de chave vazia se for convertido
+    privileged: true  # <-- aqui!
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
-    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
