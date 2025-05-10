@@ -47,9 +47,8 @@ def train(train_loader, model, optimizer, epoch, save_path, device):
             if opt.task == 'RGBD':
                 tis = cat((tis, tis, tis), dim=1)
 
-            if opt.network == 0:
-                gts2 = interpolate(gts, (112, 112))
-                gts3 = interpolate(gts, (56, 56))
+            gts2 = interpolate(gts, (112, 112))
+            gts3 = interpolate(gts, (56, 56))
 
             bound = tesnor_bound(gts, 3).to(device)
             bound2 = interpolate(bound, (112, 112))
@@ -60,9 +59,8 @@ def train(train_loader, model, optimizer, epoch, save_path, device):
             loss1 = IOUBCE(out[0], gts)
 
             # If MBV2 using loss SOD from original papper
-            if opt.network == 0:
-                loss2 = IOUBCE(out[1], gts2)
-                loss3 = IOUBCE(out[2], gts3)
+            loss2 = IOUBCE(out[1], gts2)
+            loss3 = IOUBCE(out[2], gts3)
 
             predict_bound0 = out[0]
             predict_bound1 = out[1]
@@ -75,7 +73,7 @@ def train(train_loader, model, optimizer, epoch, save_path, device):
             loss8 = IOUBCEWithoutLogits(predict_bound2, bound3)
 
             # If MBV2 using loss SOD from original papper
-            loss_sod = loss1 if opt.network != 0 else loss1 + loss2 + loss3
+            loss_sod = loss1 + loss2 + loss3
             loss_bound =  loss6 + loss7 * 0.5 + loss8 * 0.25
             loss_trans =  out[3]
             loss = loss_sod + loss_bound + loss_trans

@@ -22,18 +22,18 @@ taskipy = "^1.14.1"
 
 # Torch 2.2.2 with CUDA 12.1 or higher 
 # Uncoment if you don't use docker compose
-# torch = [
-#     {url = "https://download.pytorch.org/whl/cu121/torch-2.2.2%2Bcu121-cp312-cp312-linux_x86_64.whl", platform = "linux"},
-#     {url = "https://download.pytorch.org/whl/cu121/torch-2.2.2%2Bcu121-cp312-cp312-win_amd64.whl", platform = "win32"},
-# ]
-# torchaudio = [
-#     {url = "https://download.pytorch.org/whl/cu121/torchaudio-2.2.2%2Bcu121-cp312-cp312-linux_x86_64.whl", platform = "linux"},
-#     {url = "https://download.pytorch.org/whl/cu121/torchaudio-2.2.2%2Bcu121-cp312-cp312-win_amd64.whl", platform = "win32"},
-# ]
-# torchvision = [
-#     {url = "https://download.pytorch.org/whl/cu121/torchvision-0.17.2%2Bcu121-cp312-cp312-linux_x86_64.whl", platform = "linux"},
-#     {url = "https://download.pytorch.org/whl/cu121/torchvision-0.17.2%2Bcu121-cp312-cp312-win_amd64.whl", platform = "win32"},
-# ]
+ torch = [
+     {url = "https://download.pytorch.org/whl/cu121/torch-2.2.2%2Bcu121-cp312-cp312-linux_x86_64.whl", platform = "linux"},
+     {url = "https://download.pytorch.org/whl/cu121/torch-2.2.2%2Bcu121-cp312-cp312-win_amd64.whl", platform = "win32"},
+ ]
+ torchaudio = [
+     {url = "https://download.pytorch.org/whl/cu121/torchaudio-2.2.2%2Bcu121-cp312-cp312-linux_x86_64.whl", platform = "linux"},
+     {url = "https://download.pytorch.org/whl/cu121/torchaudio-2.2.2%2Bcu121-cp312-cp312-win_amd64.whl", platform = "win32"},
+ ]
+ torchvision = [
+     {url = "https://download.pytorch.org/whl/cu121/torchvision-0.17.2%2Bcu121-cp312-cp312-linux_x86_64.whl", platform = "linux"},
+     {url = "https://download.pytorch.org/whl/cu121/torchvision-0.17.2%2Bcu121-cp312-cp312-win_amd64.whl", platform = "win32"},
+ ]
 
 [tool.ruff]
 line-length = 79

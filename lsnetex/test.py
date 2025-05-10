@@ -1,11 +1,11 @@
 import time
-from torch import device, load, cat, no_grad, sigmoid, sum, abs, numel
+from torch import device, load, cat, no_grad, sigmoid, sum, abs, numel, tensor
 from torch.cuda import is_available
-from tqdm import tqdm
+from torchvision.utils import make_grid
 
 from lsnetex.dataloader.test_dataset import TestDataset
 from lsnetex.models.LSNetEx import LSNetEx
-from lsnetex.config import opt
+from lsnetex.config import opt, save_name, task
 from tensorboardX import SummaryWriter
 
 import wandb
@@ -20,12 +20,14 @@ print('Device in use:', my_device)
 wandb.init(
     project="LSNetEx - val", 
         sync_tensorboard=True, 
-        name=f'Netork {opt.network}',
+        name=save_name,
+        mode=opt.wandb_mode,
         config={
-        "learning_rate": 1e-4,
-        "architecture": "Mobilenetv3",
-        "dataset": "RGBT",
-        "epochs": 20,
+        "learning_rate": opt.lr,
+        "batch_size": opt.batchsize,
+        "epochs": opt.epoch,
+        "dataset_path": dataset_path,
+        "dataset": task,
         })
 
 writer = SummaryWriter(opt.test_save_path + 'summary', flush_secs=30)
@@ -66,8 +68,12 @@ for index, dataset in enumerate(test_datasets):
 
     tp_sum, fp_sum, fn_sum, tn_sum, iou_sum, dice_sum = 0, 0, 0, 0, 0, 0
 
-    for i in tqdm(range(test_loader.size)):
+    # Calcular tempo de execução
+    start_time = time.time()
+
+    for i in range(test_loader.size):
         image, gt, ti, name = test_loader.load_data()
+
         gt = gt.to(my_device)
         image = image.to(my_device)
         ti = ti.to(my_device)
@@ -98,6 +104,25 @@ for index, dataset in enumerate(test_datasets):
             fp_sum += (predict_binary * (1 - gt)).sum().item()
             fn_sum += ((1 - predict_binary) * gt).sum().item()
             tn_sum += ((1 - predict_binary) * (1 - gt)).sum().item()
+
+            # Salvar imagem predita no wandb
+            if i % 100 == 0:
+                grid_image = make_grid(image.clone().cpu().data, 1, normalize=True)
+                writer.add_image('test/Image', grid_image, i)
+                grid_image = make_grid(gt.clone().cpu().data, 1, normalize=True)
+                writer.add_image('test/Ground_truth', grid_image, i)
+                grid_image = make_grid(ti.clone().cpu().data, 1, normalize=True)
+                writer.add_image('test/bound', grid_image, i)
+
+                grid_image = make_grid(predict.clone().cpu().data, 1, normalize=True)
+                writer.add_image('OUT/out', grid_image, i, dataformats='CHW')
+                grid_image = make_grid(predict_binary.clone().cpu().data, 1, normalize=True)
+                writer.add_image('OUT/bound', grid_image, i, dataformats='CHW')
+    
+    # Calcular tempo total
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Time taken for {dataset}: {elapsed_time:.2f} seconds")
 
     # Cálculos finais
     test_mae = mae_sum / test_loader.size

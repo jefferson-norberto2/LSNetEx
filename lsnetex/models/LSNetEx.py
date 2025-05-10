@@ -29,32 +29,14 @@ class LSNetEx(Module):
             print(self.name)
             self._load_v2()
         elif self.network == 1:
-            self.alpha_5 = Parameter(tensor(0.2))
-            self.alpha_4 = Parameter(tensor(0.2))
-            self.alpha_3 = Parameter(tensor(0.2))
-            self.alpha_2 = Parameter(tensor(0.2))
-            self.alpha_1 = Parameter(tensor(0.2))
             self.name = 'LSNet Small'
             print(self.name)
             self._load_small()
         elif self.network == 2:
-            self.alpha_5 = Parameter(tensor(0.2))
-            self.alpha_4 = Parameter(tensor(0.2))
-            self.alpha_3 = Parameter(tensor(0.2))
-            self.alpha_2 = Parameter(tensor(0.2))
-            self.alpha_1 = Parameter(tensor(0.2))
             self.name = 'LSNet Large'
             print(self.name)
             self._load_large()
         elif self.network == 3:
-            # Pesos treináveis para cada nível de fusão
-            self.alpha_7 = Parameter(tensor(0.15))
-            self.alpha_6 = Parameter(tensor(0.15))
-            self.alpha_5 = Parameter(tensor(0.15))
-            self.alpha_4 = Parameter(tensor(0.15))
-            self.alpha_3 = Parameter(tensor(0.15))
-            self.alpha_2 = Parameter(tensor(0.15))
-            self.alpha_1 = Parameter(tensor(0.10))
             self.name = 'LSNet Large++'
             print(self.name)
             self._load_large_plus_plus()
@@ -185,22 +167,7 @@ class LSNetEx(Module):
 
         """
         if self.network == 3:
-            # Normaliza os pesos para que estejam no intervalo [0, 1]
-            self.alpha_7.data = hardtanh(self.alpha_7.data, 0, 1)
-            self.alpha_6.data = hardtanh(self.alpha_6.data, 0, 1)
-            self.alpha_5.data = hardtanh(self.alpha_5.data, 0, 1)
-            self.alpha_4.data = hardtanh(self.alpha_4.data, 0, 1)
-            self.alpha_3.data = hardtanh(self.alpha_3.data, 0, 1)
-            self.alpha_2.data = hardtanh(self.alpha_2.data, 0, 1)
-            self.alpha_1.data = hardtanh(self.alpha_1.data, 0, 1)
             out = self._forward_2d(rgb, ti)
-        elif self.network != 0:
-            self.alpha_5.data = hardtanh(self.alpha_5.data, 0, 1)
-            self.alpha_4.data = hardtanh(self.alpha_4.data, 0, 1)
-            self.alpha_3.data = hardtanh(self.alpha_3.data, 0, 1)
-            self.alpha_2.data = hardtanh(self.alpha_2.data, 0, 1)
-            self.alpha_1.data = hardtanh(self.alpha_1.data, 0, 1)
-            out = self._forward_imp(rgb, ti)
         else:
             out = self._forward_imp(rgb, ti)
         return out
@@ -210,13 +177,13 @@ class LSNetEx(Module):
         A1_t, A2_t, A3_t, A4_t, A5_t, A6_t, A7_t = self.depth_pretrained(ti)
 
         # Aplicando soma ponderada nos níveis intermediários
-        F7 = self.alpha_7 * A7 + (1 - self.alpha_7) * A7_t
-        F6 = self.alpha_6 * A6 + (1 - self.alpha_6) * A6_t
-        F5 = self.alpha_5 * A5 + (1 - self.alpha_5) * A5_t
-        F4 = self.alpha_4 * A4 + (1 - self.alpha_4) * A4_t
-        F3 = self.alpha_3 * A3 + (1 - self.alpha_3) * A3_t
-        F2 = self.alpha_2 * A2 + (1 - self.alpha_2) * A2_t
-        F1 = self.alpha_1 * A1 + (1 - self.alpha_1) * A1_t
+        F7 = A7 + A7_t
+        F6 = A6 + A6_t
+        F5 = A5 + A5_t
+        F4 = A4 + A4_t
+        F3 = A3 + A3_t
+        F2 = A2 + A2_t
+        F1 = A1 + A1_t
 
         F7 = self.upsample7_g(F7)
         F6 = cat((F6, F7), dim=1)
@@ -273,18 +240,11 @@ class LSNetEx(Module):
         # ti
         A1_t, A2_t, A3_t, A4_t, A5_t = self.depth_pretrained(ti)
 
-        if self.network != 0:
-            F5 = self.alpha_5 * A5 + (1 - self.alpha_5) * A5_t
-            F4 = self.alpha_4 * A4 + (1 - self.alpha_4) * A4_t
-            F3 = self.alpha_3 * A3 + (1 - self.alpha_3) * A3_t
-            F2 = self.alpha_2 * A2 + (1 - self.alpha_2) * A2_t
-            F1 = self.alpha_1 * A1 + (1 - self.alpha_1) * A1_t
-        else:
-            F5 = A5_t + A5
-            F4 = A4_t + A4
-            F3 = A3_t + A3
-            F2 = A2_t + A2
-            F1 = A1_t + A1
+        F5 = A5_t + A5
+        F4 = A4_t + A4
+        F3 = A3_t + A3
+        F2 = A2_t + A2
+        F1 = A1_t + A1
 
         F5 = self.upsample5_g(F5)      
         F4 = cat((F4, F5), dim=1)
